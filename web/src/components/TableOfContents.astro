@@ -1,0 +1,8 @@
+---
+// 桌面端：阅读控制在页内目录上方。窄屏下这一列不显示，控制条改由 MobileTableOfContents 那一路渲染。
+import Default from '@astrojs/starlight/components/TableOfContents.astro';
+import ReadingTools from './ReadingTools.astro';
+---
+
+<ReadingTools variant="sidebar" />
+<Default />

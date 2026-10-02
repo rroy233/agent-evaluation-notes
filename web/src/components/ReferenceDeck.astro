@@ -1,0 +1,374 @@
+---
+// 每张卡片保留一段连续上下文，荧光标记其中最能概括文章观点的句子。
+const sources = [
+  {
+    mark: 'A',
+    organisation: 'Anthropic',
+    author: 'Engineering at Anthropic',
+    title: 'Demystifying evals for AI agents',
+    before: 'Good evaluations help teams ship AI agents more confidently. Without them, it is easy to catch issues only in production.',
+    highlight: 'Evals make problems and behavioral changes visible before they affect users.',
+    after: 'Their value compounds over the lifecycle of an agent.',
+    href: 'https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents',
+    color: 'hsl(27 53% 42%)',
+  },
+  {
+    mark: 'LC',
+    organisation: 'LangChain',
+    author: 'LangChain',
+    title: 'Evaluating AI Agents at the Run, Trace, and Thread Level',
+    before: 'An agent can pass every test and still be fragile in production. The answers can look great at first.',
+    highlight: 'A correct answer can mask an unstable, inefficient, or risky execution path.',
+    after: 'Evaluation needs to consider the output, tool path, context, and conversation state together.',
+    href: 'https://www.langchain.com/resources/agent-evals',
+    color: 'hsl(145 43% 34%)',
+  },
+  {
+    mark: 'S',
+    organisation: 'Sierra',
+    author: 'Sierra AI research team',
+    title: 'τ-bench: benchmarking AI agents for the real-world',
+    before: 'Real-world agents interact with users and programmatic APIs over many turns. They must also follow rules for a specific domain.',
+    highlight: 'τ-bench compares the final database state with an annotated goal state.',
+    after: 'Its pass^k metric measures whether behavior remains consistent across repeated trials.',
+    href: 'https://sierra.ai/resources/research/tau-bench',
+    color: 'hsl(267 50% 49%)',
+  },
+  {
+    mark: 'O',
+    organisation: 'OpenAI',
+    author: 'OpenAI',
+    title: 'Evaluation best practices',
+    before: 'Generative AI is variable, so models may produce different output from the same input.',
+    highlight: 'Evals are structured tests for measuring a model’s performance despite this variability.',
+    after: 'The guide starts with an objective, then defines a dataset, metrics, comparison, and continuous evaluation.',
+    href: 'https://developers.openai.com/api/docs/guides/evaluation-best-practices?api-mode=responses',
+    color: 'hsl(190 48% 34%)',
+  },
+  {
+    mark: 'O',
+    organisation: 'OpenAI',
+    author: 'OpenAI',
+    title: 'Build an Agent Improvement Loop with Traces, Evals, and Codex',
+    before: 'The notebook starts with real traces, then adds human and model feedback. It turns that feedback into evals that can run again later.',
+    highlight: 'Traces show what happened, feedback explains what mattered, and evals make expectations reusable.',
+    after: 'The resulting evidence then informs the next harness changes.',
+    href: 'https://developers.openai.com/cookbook/examples/agents_sdk/agent_improvement_loop',
+    color: 'hsl(190 48% 34%)',
+  },
+  {
+    mark: 'O',
+    organisation: 'OpenAI',
+    author: 'OpenAI',
+    title: 'Testing Agent Skills Systematically with Evals',
+    before: 'A skill can appear faster or more reliable while a regression slips in. Capturing a run makes the behavior available for review.',
+    highlight: 'An eval is a prompt, a captured run, a small set of checks, and a score.',
+    after: 'The checks can cover the task result, required steps, conventions, and unnecessary work.',
+    href: 'https://developers.openai.com/blog/eval-skills',
+    color: 'hsl(190 48% 34%)',
+  },
+  {
+    mark: 'Lf',
+    organisation: 'Langfuse',
+    author: 'Langfuse',
+    title: 'Evaluation Overview',
+    before: 'Evaluation can score live production traces and turn useful examples into datasets. It can also run experiments to compare a change.',
+    highlight: 'Evals give you a repeatable check of your LLM application’s behavior.',
+    after: 'The same work happens online with live traces and offline before a change is released.',
+    href: 'https://langfuse.com/docs/evaluation/overview',
+    color: 'hsl(241 54% 48%)',
+  },
+  {
+    mark: '美',
+    organisation: '美团',
+    author: '履约技术团队',
+    title: 'Agent 评测漫谈——由浅入深讲解 Agent 评测',
+    before: '评测服务于真实业务中的研发、上线、回归、优化和规模化落地。观测记录每一步输入、输出和中间过程，为定位问题提供依据。',
+    highlight: '评测的核心目的是回答 Agent 的好不好，以及到底哪里好、哪里不好。',
+    after: '评测同时关注任务结果、执行过程、效率和风险。',
+    href: 'https://tech.meituan.com/2026/08/07/Agent-Evaluation.html',
+    color: 'hsl(12 78% 50%)',
+  },
+  {
+    mark: '美',
+    organisation: '美团',
+    author: '图灵 Agent 评测',
+    title: '《Agent 评测白皮书》系列 01：Agent 评测全览',
+    before: 'Agent 上线后，在线评测和监控会持续产出异常信号。团队通过案例挖掘和归因，判断问题来自评测集、标准，还是 Agent 本身。',
+    highlight: '评测是一门实践科学。',
+    after: '每次迭代都需要结合业务特点调整做法，并关注每个做法要解决的问题。',
+    href: 'https://tech.meituan.com/2026/09/10/Agent-Evaluation-White-Paper-01.html',
+    color: 'hsl(12 78% 50%)',
+  },
+];
+---
+
+<section class="reference-deck" data-reference-deck aria-label="文章卡片轮播">
+  <div class="reference-deck-stage">
+    {
+      sources.map((source, index) => (
+        <article
+          class="reference-card"
+          data-reference-card={index}
+          data-state={index === 0 ? 'active' : 'stack'}
+          aria-hidden={index === 0 ? 'false' : 'true'}
+          style={`--source-accent: ${source.color}`}
+        >
+          <div class="reference-card-topline">
+            <span class="reference-logo" aria-hidden="true">{source.mark}</span>
+            <span class="reference-org">{source.organisation}</span>
+            <a href={source.href} target="_blank" rel="noreferrer" aria-label={`打开 ${source.title} 原文`}>↗</a>
+          </div>
+          <h3>{source.title}</h3>
+          <p class="reference-author">作者 · {source.author}</p>
+          <p class="reference-excerpt">
+            {source.before} <span class="reference-highlight">{source.highlight}</span> {source.after}
+          </p>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .reference-deck {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .reference-card-topline {
+    display: flex;
+    align-items: center;
+  }
+
+  .reference-deck-stage {
+    position: relative;
+    height: clamp(23rem, 34vw, 28rem);
+    container-type: inline-size;
+    isolation: isolate;
+  }
+
+  .reference-card {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr;
+    min-width: 0;
+    padding: clamp(1.25rem, 4cqw, 1.8rem);
+    overflow: hidden;
+    color: var(--sl-color-white);
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--source-accent) 11%, var(--sl-color-bg)) 0 28%, transparent 28%),
+      var(--reader-paper-raised);
+    border: 1px solid color-mix(in srgb, var(--source-accent) 28%, var(--sl-color-hairline));
+    border-radius: 0.75rem;
+    box-shadow: 0 1.1rem 2rem color-mix(in srgb, var(--sl-color-gray-1) 12%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.9rem) scale(0.975);
+    transition: opacity 240ms ease-out, transform 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .reference-card::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    pointer-events: none;
+    background: linear-gradient(115deg, transparent 0 42%, color-mix(in srgb, white 30%, transparent) 50%, transparent 58%);
+    opacity: 0;
+  }
+
+  .reference-card[data-state='stack'] {
+    z-index: 0;
+    opacity: 0.36;
+    transform: translate(0.55rem, 0.7rem) rotate(1.4deg) scale(0.97);
+  }
+
+  .reference-card[data-state='active'] {
+    z-index: 2;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+
+  .reference-card[data-state='leaving'] {
+    z-index: 3;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(14%, -0.3rem) rotate(7deg) scale(0.98);
+  }
+
+  .reference-card[data-state='leaving']::after {
+    opacity: 1;
+    animation: card-swipe 480ms ease-out both;
+  }
+
+  .reference-logo {
+    display: grid;
+    width: 2.15rem;
+    height: 2.15rem;
+    place-items: center;
+    color: white;
+    background: var(--source-accent);
+    border-radius: 0.55rem;
+    box-shadow: 0 0.35rem 0.8rem color-mix(in srgb, var(--source-accent) 25%, transparent);
+    font-size: 0.8rem;
+    font-weight: 750;
+    letter-spacing: -0.04em;
+  }
+
+  .reference-org {
+    flex: 1;
+    margin-inline-start: 0.65rem;
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-sm);
+    font-weight: 650;
+  }
+
+  .reference-card-topline a {
+    color: var(--source-accent);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .reference-card h3 {
+    max-width: 23ch;
+    margin: 1.25rem 0 0;
+    font-size: clamp(1.18rem, 3.2cqw, 1.55rem);
+    line-height: 1.24;
+    letter-spacing: -0.018em;
+    text-wrap: balance;
+  }
+
+  .reference-author {
+    margin: 0.5rem 0 0;
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-xs);
+  }
+
+  .reference-excerpt {
+    align-self: stretch;
+    max-width: 34ch;
+    margin: 1.35rem 0 0;
+    color: var(--sl-color-gray-2);
+    font-family: var(--sl-font-system-mono);
+    font-size: clamp(0.78rem, 2.2cqw, 0.91rem);
+    line-height: 1.78;
+  }
+
+  .reference-highlight {
+    padding-inline: 0.13em;
+    background: linear-gradient(transparent 42%, color-mix(in srgb, hsl(52 90% 62%) 70%, transparent) 42% 91%, transparent 91%);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .reference-card[data-state='active'] .reference-highlight {
+    animation: highlight-note 1.25s 300ms both;
+  }
+
+  @keyframes card-swipe {
+    from { transform: translateX(-120%); }
+    to { transform: translateX(120%); }
+  }
+
+  @keyframes highlight-note {
+    from { background-size: 0 100%; background-repeat: no-repeat; }
+    to { background-size: 100% 100%; background-repeat: no-repeat; }
+  }
+
+  @media (max-width: 59.999rem) {
+    .reference-deck-stage {
+      height: min(28rem, 112vw);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reference-card,
+    .reference-card::after,
+    .reference-highlight {
+      animation: none !important;
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  let cleanup = () => {};
+
+  const boot = () => {
+    cleanup();
+    const deck = document.querySelector<HTMLElement>('[data-reference-deck]');
+    if (!deck) return;
+
+    const cards = [...deck.querySelectorAll<HTMLElement>('[data-reference-card]')];
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const INTERVAL = 4600;
+    let active = 0;
+    let visible = true;
+    let timer = 0;
+    let phaseTimer = 0;
+
+    const render = () => {
+      cards.forEach((card, index) => {
+        if (index === active) {
+          card.dataset.state = 'active';
+          card.setAttribute('aria-hidden', 'false');
+        } else if (card.dataset.state !== 'leaving') {
+          card.dataset.state = 'stack';
+          card.setAttribute('aria-hidden', 'true');
+        }
+      });
+    };
+
+    const stop = () => {
+      window.clearInterval(timer);
+      timer = 0;
+      window.clearTimeout(phaseTimer);
+      phaseTimer = 0;
+    };
+
+    const advance = () => {
+      const current = cards[active];
+      const next = (active + 1) % cards.length;
+      current.dataset.state = 'leaving';
+      current.setAttribute('aria-hidden', 'true');
+      active = next;
+      render();
+      phaseTimer = window.setTimeout(() => {
+        current.dataset.state = 'stack';
+        render();
+      }, 480);
+    };
+
+    const start = () => {
+      stop();
+      if (!visible || reduced.matches || cards.length < 2) return;
+      timer = window.setInterval(advance, INTERVAL);
+    };
+
+    render();
+    start();
+
+    let observer: IntersectionObserver | undefined;
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver((entries) => {
+        visible = entries.some((entry) => entry.isIntersecting);
+        if (visible) start();
+        else stop();
+      }, { threshold: 0.2 });
+      observer.observe(deck);
+    }
+
+    const onMotionChange = () => start();
+    reduced.addEventListener('change', onMotionChange);
+    cleanup = () => {
+      stop();
+      observer?.disconnect();
+      reduced.removeEventListener('change', onMotionChange);
+    };
+  };
+
+  document.addEventListener('astro:page-load', boot);
+</script>

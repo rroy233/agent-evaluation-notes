@@ -1,0 +1,145 @@
+---
+// 阅读控制：字号、专注模式、章内进度。
+// 桌面端放在右侧目录上方，手机和平板固定在底部。
+// 默认 hidden，脚本初始化后由 [data-reader="on"] 显示，无 JavaScript 时这些控件不出现。
+interface Props {
+  variant: 'sidebar' | 'bar';
+}
+const { variant } = Astro.props;
+---
+
+<div class={`reader-tools reader-tools--${variant}`} hidden data-reader-tools>
+  <div
+    class="reader-progress"
+    role="progressbar"
+    aria-label="本页阅读进度"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-valuenow="0"
+    data-reader-progress
+  >
+    <span class="reader-progress-fill" data-reader-progress-fill></span>
+  </div>
+  <div class="reader-row">
+    <span class="reader-percent" data-reader-percent>0%</span>
+    <div class="reader-group" role="group" aria-label="字号">
+      <button type="button" data-reader-size="down" title="减小字号">A−</button>
+      <button type="button" data-reader-size="up" title="增大字号">A+</button>
+    </div>
+    <button type="button" data-reader-focus aria-pressed="false" title="专注模式：隐藏导航，只留正文">专注</button>
+  </div>
+</div>
+
+<script>
+  const SIZES = [0.9, 1, 1.12, 1.25, 1.42];
+  const K_SIZE = 'reader:v1:scale';
+  const K_FOCUS = 'reader:v1:focus';
+
+  const store = {
+    get(key: string): string | null {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    },
+    set(key: string, value: string) {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        /* 隐私模式下写不进去，忽略 */
+      }
+    },
+  };
+
+  const root = document.documentElement;
+  let pageController: AbortController | undefined;
+
+  // 专注模式会隐藏右侧栏，里面的控制按钮跟着一起没了。
+  // 桌面端另挂一个固定在右上角的退出按钮，保证任何时候都退得出来。
+  let exitButton: HTMLButtonElement | null = null;
+  function ensureExitButton() {
+    if (exitButton?.isConnected || !document.body) return;
+    exitButton = document.createElement('button');
+    exitButton.type = 'button';
+    exitButton.className = 'reader-focus-exit';
+    exitButton.textContent = '退出专注';
+    exitButton.addEventListener('click', () => applyFocus(false));
+    document.body.append(exitButton);
+  }
+
+  function applyScale(scale: number) {
+    const value = Math.min(SIZES[SIZES.length - 1], Math.max(SIZES[0], scale));
+    root.style.setProperty('--reader-scale', String(value));
+    store.set(K_SIZE, String(value));
+  }
+
+  function currentIndex(): number {
+    const now = Number(root.style.getPropertyValue('--reader-scale')) || 1;
+    let best = 0;
+    for (let i = 0; i < SIZES.length; i += 1) if (Math.abs(SIZES[i] - now) < Math.abs(SIZES[best] - now)) best = i;
+    return best;
+  }
+
+  function applyFocus(on: boolean) {
+    root.dataset.focus = on ? 'on' : 'off';
+    for (const b of document.querySelectorAll<HTMLButtonElement>('[data-reader-focus]')) {
+      b.setAttribute('aria-pressed', String(on));
+      b.textContent = on ? '退出专注' : '专注';
+    }
+    store.set(K_FOCUS, on ? '1' : '0');
+  }
+
+  function boot() {
+    pageController?.abort();
+    pageController = new AbortController();
+    const { signal } = pageController;
+
+    root.dataset.reader = 'on';
+
+    // 字号与专注模式的首屏状态由 Head 里的内联脚本写入，这里只同步控件
+    const saved = Number(store.get(K_SIZE));
+    applyScale(Number.isFinite(saved) && saved > 0 ? saved : 1);
+    applyFocus(store.get(K_FOCUS) === '1');
+
+    for (const el of document.querySelectorAll<HTMLElement>('[data-reader-tools]')) el.hidden = false;
+    ensureExitButton();
+
+    document.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const sizeBtn = t.closest<HTMLElement>('[data-reader-size]');
+      if (sizeBtn) {
+        const next = currentIndex() + (sizeBtn.dataset.readerSize === 'up' ? 1 : -1);
+        applyScale(SIZES[Math.min(SIZES.length - 1, Math.max(0, next))]);
+        return;
+      }
+      if (t.closest('[data-reader-focus]')) applyFocus(root.dataset.focus !== 'on');
+    }, { signal });
+
+    // 章内进度
+    const article = document.querySelector<HTMLElement>('.sl-markdown-content');
+    // 桌面侧栏和窄屏底栏各渲染一份控件，两份都要更新。
+    const bars = [...document.querySelectorAll<HTMLElement>('[data-reader-progress-fill]')];
+    const pcts = [...document.querySelectorAll<HTMLElement>('[data-reader-percent]')];
+    const rings = [...document.querySelectorAll<HTMLElement>('[data-reader-progress]')];
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      if (!article) return;
+      const rect = article.getBoundingClientRect();
+      const total = Math.max(1, rect.height - window.innerHeight);
+      const value = Math.round(Math.min(1, Math.max(0, -rect.top / total)) * 100);
+      for (const bar of bars) bar.style.setProperty('--reader-progress', String(value / 100));
+      for (const pct of pcts) pct.textContent = `${value}%`;
+      for (const ring of rings) ring.setAttribute('aria-valuenow', String(value));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true, signal });
+    window.addEventListener('resize', onScroll, { signal });
+    update();
+  }
+
+  document.addEventListener('astro:page-load', boot);
+</script>

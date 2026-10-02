@@ -1,0 +1,25 @@
+---
+// 图片查看器。整页只渲染一次。
+---
+
+<dialog id="figure-dialog" class="figure-dialog" aria-label="图片查看器">
+  <div class="figure-dialog-bar">
+    <button id="figure-zoom-out" type="button" title="缩小">缩小</button>
+    <output id="figure-zoom-level" aria-live="polite">100%</output>
+    <button id="figure-zoom-in" type="button" title="放大">放大</button>
+    <button id="figure-fit" type="button">适应宽度</button>
+    <a id="figure-original" href="#" target="_blank" rel="noopener">打开原图</a>
+    <button id="close-figure" type="button">关闭</button>
+  </div>
+  <div id="figure-canvas" class="figure-canvas" tabindex="0">
+    <img id="expanded-figure" alt="" draggable="false" />
+  </div>
+  <p id="figure-caption" class="figure-dialog-caption"></p>
+</dialog>
+
+<script>
+  import { initFigureViewer } from '../scripts/figure-viewer';
+
+  const start = () => initFigureViewer();
+  document.addEventListener('astro:page-load', start);
+</script>

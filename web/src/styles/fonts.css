@@ -1,0 +1,33 @@
+/* 字体全部来自站内，不请求外部域。子集由 dev/subset-fonts.py 生成。 */
+@font-face {
+  font-family: 'Newsreader';
+  src: url('../assets/fonts/Newsreader-Roman.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Newsreader';
+  src: url('../assets/fonts/Newsreader-Italic.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* 中文没有真斜体，<em> 里的汉字由浏览器倾斜合成，这是预期行为。 */
+@font-face {
+  font-family: 'Source Han Serif SC';
+  src: url('../assets/fonts/SourceHanSerifSC-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Han Serif SC';
+  src: url('../assets/fonts/SourceHanSerifSC-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

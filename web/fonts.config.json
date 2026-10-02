@@ -1,0 +1,63 @@
+{
+  "_comment": "字体子集化和覆盖率检查共用这份配置。renderChars 是 Markdown 渲染可能产出、但源文件里不直接出现的字符。",
+  "uiText": "AI Agent 首页 正文 字号 专注模式 高亮 撤销 导出 导入 备份 本章高亮 适应宽度 放大 缩小 打开原图 关闭 图片查看器 上一页 下一页 章内进度 已复制 取消 确定 提示 本页进度 刷新 粘贴",
+  "renderChars": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~–—‘’“”…·•§¶†‡©®™°±×÷≠≤≥≈∞µ←→↑↓↔↩，。、；：？！（）《》〈〉「」『』【】〔〕％＃＆＠～｜αβγδεζηθικλμνξπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΠΡΣΤΥΦΧΨΩ",
+  "sources": [
+    {
+      "file": "SourceHanSerifCN-Regular.otf",
+      "url": "https://github.com/adobe-fonts/source-han-serif/raw/release/SubsetOTF/CN/SourceHanSerifCN-Regular.otf",
+      "bytes": 11626108,
+      "license": "LICENSE-SourceHanSerif.txt",
+      "licenseUrl": "https://raw.githubusercontent.com/adobe-fonts/source-han-serif/release/LICENSE.txt"
+    },
+    {
+      "file": "SourceHanSerifCN-Bold.otf",
+      "url": "https://github.com/adobe-fonts/source-han-serif/raw/release/SubsetOTF/CN/SourceHanSerifCN-Bold.otf",
+      "bytes": 12094680,
+      "license": "LICENSE-SourceHanSerif.txt",
+      "licenseUrl": "https://raw.githubusercontent.com/adobe-fonts/source-han-serif/release/LICENSE.txt"
+    },
+    {
+      "file": "Newsreader-VF.ttf",
+      "url": "https://github.com/google/fonts/raw/main/ofl/newsreader/Newsreader%5Bopsz,wght%5D.ttf",
+      "bytes": null,
+      "license": "LICENSE-Newsreader.txt",
+      "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/newsreader/OFL.txt"
+    },
+    {
+      "file": "Newsreader-Italic-VF.ttf",
+      "url": "https://github.com/google/fonts/raw/main/ofl/newsreader/Newsreader-Italic%5Bopsz,wght%5D.ttf",
+      "bytes": null,
+      "license": "LICENSE-Newsreader.txt",
+      "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/newsreader/OFL.txt"
+    }
+  ],
+  "outputs": [
+    {
+      "font": "SourceHanSerifCN-Regular.otf",
+      "out": "SourceHanSerifSC-Regular.woff2",
+      "practice": "中文正体"
+    },
+    {
+      "font": "SourceHanSerifCN-Bold.otf",
+      "out": "SourceHanSerifSC-Bold.woff2",
+      "practice": "中文粗体"
+    },
+    {
+      "font": "Newsreader-VF.ttf",
+      "out": "Newsreader-Roman.woff2",
+      "practice": "英文正体可变",
+      "pinOpsz": 18
+    },
+    {
+      "font": "Newsreader-Italic-VF.ttf",
+      "out": "Newsreader-Italic.woff2",
+      "practice": "英文斜体可变",
+      "pinOpsz": 18
+    }
+  ],
+  "knownFallbacks": {
+    "_comment": "允许回退到系统字体的字符，键是字符，值是原因。",
+    "↩": "Starlight 渲染 GFM 脚注时自带 154 处回跳图标，两款字体都没有该字形；reading.css 里为它显式指定了系统符号字体栈。"
+  }
+}

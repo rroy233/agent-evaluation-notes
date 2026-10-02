@@ -1,0 +1,22 @@
+---
+// 在首屏渲染前把字号和专注模式写进 <html> 的 data 属性和自定义属性，
+// 否则刷新时正文会先按默认字号画一遍再跳一下。
+import Default from '@astrojs/starlight/components/Head.astro';
+import { ClientRouter } from 'astro:transitions';
+---
+
+<Default />
+<ClientRouter />
+<script is:inline>
+  (() => {
+    const root = document.documentElement;
+    try {
+      const raw = localStorage.getItem('reader:v1:scale');
+      const scale = raw === null ? 1 : Number(raw);
+      root.style.setProperty('--reader-scale', String(Math.min(1.42, Math.max(0.9, Number.isFinite(scale) ? scale : 1))));
+      if (localStorage.getItem('reader:v1:focus') === '1') root.dataset.focus = 'on';
+    } catch {
+      root.style.setProperty('--reader-scale', '1');
+    }
+  })();
+</script>

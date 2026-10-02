@@ -1,0 +1,305 @@
+---
+// 首页的 Agent 循环动画。五步自动循环，支持减少动态偏好和离屏暂停。
+// 没有 JavaScript 时五个节点和当前说明仍然完整可读，只是不会自动前进。
+const steps = [
+  { label: '成功标准', desc: '先写清判断 Agent 好坏的依据：量什么、凭什么量、算不算成功。' },
+  { label: '测评任务', desc: '把标准写成可重复执行的任务：输入、环境、预期结果和行为约束。' },
+  { label: '判定器', desc: '定下谁来读证据、凭什么判定通过，并用人工标注校准判定质量。' },
+  { label: '测评集与结果', desc: '把任务和判定器组织成测评集，固定条件跑实验，读懂版本之间的差异。' },
+  { label: '发布与问题回收', desc: '用结果决定是否发布，再把线上发现的问题转成新的测评任务，补回第一步。' },
+];
+---
+
+<div class="agent-loop" data-loop>
+  <div class="loop-stage">
+    <svg class="loop-ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      <circle class="loop-track" cx="50" cy="50" r="42" />
+      <circle class="loop-progress" cx="50" cy="50" r="42" data-loop-progress />
+      <g class="loop-arrows">
+        {
+          steps.map((_, i) => (
+            <path class="loop-arrow" data-loop-arrow={i} d="M48 6.6 L52 8 L48 9.4 Z" transform={`rotate(${(i + 0.5) * 72} 50 50)`} />
+          ))
+        }
+      </g>
+    </svg>
+
+    <span class="loop-dot" data-loop-dot aria-hidden="true"></span>
+
+    <ol class="loop-nodes">
+      {
+        steps.map((step, i) => (
+          <li class="loop-node" data-loop-node={i} style={`--i:${i}`}>
+            <span class="loop-index">{i + 1}</span>
+            <span class="loop-label">{step.label}</span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="loop-center" data-loop-center>
+      {
+        steps.map((step, i) => (
+          <div class="loop-panel" data-loop-panel={i} hidden={i !== 0}>
+            <p class="loop-count">{`第 ${i + 1} 步，共 5 步`}</p>
+            <p class="loop-title">{step.label}</p>
+            <p class="loop-desc">{step.desc}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .agent-loop {
+    --loop-size: min(26rem, 100%);
+    display: grid;
+    width: 100%;
+    gap: 0.9rem;
+    justify-items: center;
+  }
+
+  /* 整个图按容器宽度等比缩放：定位用 cqw，字号用 clamp 兜住小屏。
+     translate 的百分比是按元素自身尺寸算的，不能拿来当半径，这里一律用 cqw。 */
+  .loop-stage {
+    position: relative;
+    width: var(--loop-size);
+    aspect-ratio: 1;
+    container-type: inline-size;
+  }
+
+  .loop-ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .loop-track {
+    fill: none;
+    stroke: var(--sl-color-hairline);
+    stroke-width: 0.5;
+    stroke-dasharray: 1.6 2.2;
+  }
+
+  .loop-progress {
+    fill: none;
+    stroke: var(--sl-color-accent);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-dasharray: 263.9;
+    stroke-dashoffset: 263.9;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 500ms ease-out;
+  }
+
+  .loop-arrow {
+    fill: var(--sl-color-gray-4);
+    transition: fill 300ms ease-out;
+  }
+
+  .loop-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2.7cqw;
+    height: 2.7cqw;
+    margin: -1.35cqw 0 0 -1.35cqw;
+    border-radius: 50%;
+    background: var(--sl-color-accent);
+    box-shadow: 0 0 0 1cqw color-mix(in srgb, var(--sl-color-accent) 24%, transparent);
+    transform: rotate(calc(var(--step, 0) * 72deg)) translateY(-42cqw) rotate(calc(var(--step, 0) * -72deg));
+    transition: transform 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .loop-nodes {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .loop-node {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    gap: 0.1rem;
+    justify-items: center;
+    width: 23cqw;
+    margin: -7.5cqw 0 0 -11.5cqw;
+    padding: 0.9cqw 0.6cqw;
+    border-radius: 8px;
+    text-align: center;
+    font-size: clamp(0.6rem, 3.05cqw, 0.82rem);
+    line-height: 1.32;
+    color: var(--sl-color-text);
+    background: var(--sl-color-bg);
+    border: 1px solid transparent;
+    transform: rotate(calc(var(--i) * 72deg - 90deg)) translateY(-42cqw) rotate(calc(90deg - var(--i) * 72deg));
+    transition:
+      border-color 300ms ease-out,
+      background 300ms ease-out;
+  }
+
+  .loop-node[data-active='true'] {
+    border-color: var(--sl-color-accent);
+    background: color-mix(in srgb, var(--sl-color-accent) 14%, var(--sl-color-bg));
+  }
+
+  .loop-index {
+    display: inline-grid;
+    place-items: center;
+    width: clamp(1rem, 5cqw, 1.35rem);
+    height: clamp(1rem, 5cqw, 1.35rem);
+    border-radius: 50%;
+    font-size: clamp(0.55rem, 2.5cqw, 0.72rem);
+    font-variant-numeric: tabular-nums;
+    color: var(--sl-color-text-invert);
+    background: var(--sl-color-gray-4);
+    transition: background 300ms ease-out;
+  }
+
+  .loop-node[data-active='true'] .loop-index {
+    background: var(--sl-color-accent);
+  }
+
+  .loop-label {
+    font-weight: 600;
+  }
+
+  .loop-center {
+    position: absolute;
+    inset: 27%;
+    display: grid;
+    place-items: center;
+    text-align: center;
+  }
+
+  .loop-panel {
+    grid-area: 1 / 1;
+  }
+
+  .loop-panel[hidden] {
+    display: none;
+  }
+
+  .loop-count {
+    margin: 0;
+    font-size: clamp(0.55rem, 2.4cqw, 0.72rem);
+    color: var(--sl-color-gray-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .loop-title {
+    margin: 0.25em 0 0.35em;
+    font-size: clamp(0.78rem, 3.7cqw, 1.05rem);
+    font-weight: 600;
+  }
+
+  .loop-desc {
+    margin: 0;
+    font-size: clamp(0.62rem, 2.9cqw, 0.84rem);
+    line-height: 1.55;
+    color: var(--sl-color-gray-2);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loop-dot,
+    .loop-progress,
+    .loop-node,
+    .loop-index,
+    .loop-arrow {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  let cleanup = () => {};
+
+  const boot = () => {
+    cleanup();
+    const loop = document.querySelector<HTMLElement>('[data-loop]');
+    if (!loop) return;
+
+    const panelEls = [...loop.querySelectorAll<HTMLElement>('[data-loop-panel]')];
+    const nodeEls = [...loop.querySelectorAll<HTMLElement>('[data-loop-node]')];
+    const progress = loop.querySelector<SVGCircleElement>('[data-loop-progress]');
+    const arrows = [...loop.querySelectorAll<SVGPathElement>('[data-loop-arrow]')];
+
+    const total = panelEls.length;
+    const CIRC = 2 * Math.PI * 42;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const INTERVAL = 3000;
+
+    let step = 0;
+    let visible = true;
+    let timer = 0;
+
+    const render = () => {
+      loop.style.setProperty('--step', String(step));
+      panelEls.forEach((el, i) => {
+        el.hidden = i !== step;
+      });
+      nodeEls.forEach((el, i) => {
+        el.dataset.active = String(i === step);
+      });
+      if (progress) progress.style.strokeDashoffset = String(CIRC * (1 - (step + 1) / total));
+      arrows.forEach((a, i) => {
+        a.style.fill = i < step ? 'var(--sl-color-accent)' : 'var(--sl-color-gray-4)';
+      });
+    };
+
+    const advance = () => {
+      step = (step + 1) % total;
+      render();
+    };
+
+    const stopTimer = () => {
+      window.clearInterval(timer);
+      timer = 0;
+    };
+
+    const startTimer = () => {
+      stopTimer();
+      if (!visible || reduced.matches) return;
+      timer = window.setInterval(advance, INTERVAL);
+    };
+
+    loop.dataset.enhanced = 'true';
+    render();
+    startTimer();
+
+    // 离屏时停表，回到视口再继续
+    let observer: IntersectionObserver | undefined;
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          visible = entries.some((e) => e.isIntersecting);
+          if (visible) startTimer();
+          else stopTimer();
+        },
+        { threshold: 0.15 },
+      );
+      observer.observe(loop);
+    }
+
+    const onMotionChange = () => {
+      startTimer();
+    };
+    reduced.addEventListener('change', onMotionChange);
+    cleanup = () => {
+      stopTimer();
+      observer?.disconnect();
+      reduced.removeEventListener('change', onMotionChange);
+    };
+  };
+
+  document.addEventListener('astro:page-load', boot);
+</script>

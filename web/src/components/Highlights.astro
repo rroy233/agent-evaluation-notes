@@ -1,0 +1,55 @@
+---
+// 划重点的界面。整页只渲染一次，脚本按章页判断是否启用。
+// 用原生 <dialog>，键盘与读屏软件可以直接用；没有 JavaScript 时这些元素不出现，
+// 正文和链接不受影响。
+---
+
+<button id="open-highlights" class="highlights-toggle" type="button" hidden>
+  <span>本章高亮</span><span id="highlight-count">0</span>
+</button>
+
+<div id="highlight-selection" class="highlight-selection" role="group" aria-label="选中的文字" hidden>
+  <button id="save-highlight" type="button">高亮</button>
+</div>
+
+<p id="highlight-status" class="highlight-status" role="status"></p>
+
+<dialog id="highlights-dialog" class="hl-dialog" aria-labelledby="highlights-title">
+  <div class="hl-dialog-head">
+    <h2 id="highlights-title">本章高亮</h2>
+    <button id="close-highlights" class="hl-icon-button" type="button" aria-label="关闭本章高亮">×</button>
+  </div>
+  <p class="hl-dialog-help">
+    选中正文里的文字，工具条上点「高亮」即可。点击正文里的高亮可以就地删除。
+    清除浏览器数据或换设备之前，先导出一份备份。
+  </p>
+  <div class="hl-backup-row">
+    <button id="export-highlights" type="button">导出备份</button>
+    <label class="hl-import">导入备份<input id="import-highlights" type="file" accept="application/json,.json" /></label>
+  </div>
+  <div id="highlight-backup-panel" hidden>
+    <label for="highlight-backup-json">备份内容</label>
+    <textarea id="highlight-backup-json" rows="4" readonly></textarea>
+    <button id="copy-highlight-backup" type="button">复制备份</button>
+    <p class="hl-dialog-help">下载没有自动开始的话，把这段内容复制到 .json 文件里保存。</p>
+  </div>
+  <p id="highlight-dialog-status" role="status"></p>
+  <div id="highlight-undo" class="hl-undo" hidden>
+    <div>
+      <p id="highlight-undo-message" role="status"></p>
+      <p class="hl-dialog-help">撤销只在离开或刷新本页之前有效。</p>
+    </div>
+    <button id="undo-highlight" type="button">撤销</button>
+  </div>
+  <p id="highlights-empty">还没有划重点。保存过的段落会出现在这里。</p>
+  <ol id="highlights-list"></ol>
+</dialog>
+
+<script>
+  import { initHighlights } from '../scripts/highlights';
+
+  const start = () => {
+    void initHighlights().catch((err) => console.warn('划重点初始化失败', err));
+  };
+  document.addEventListener('astro:page-load', start);
+</script>

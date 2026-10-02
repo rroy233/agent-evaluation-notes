@@ -1,0 +1,60 @@
+---
+// 图片与三层图注。图题来自正文 alt 的第一句，图说是 alt 的其余部分，
+// 图注是正文“图注：”段落里的意义，出处是那条引用的编号。正文源文件不改动。
+// 点击图片由 figure-viewer 接管，打开 <dialog> 里的查看器。
+// data-astro-reload 让 ClientRouter 不接管这条链接；没有 JavaScript 时仍可打开原图。
+import { Image, getImage, type ImageMetadata } from 'astro:assets';
+import Cite from './Cite.astro';
+
+interface Props {
+  src: ImageMetadata;
+  title?: string;
+  desc: string;
+  number: string;
+  figcaption: string;
+  source?: number | null;
+}
+
+const { src, title = '', desc, number, figcaption, source = null } = Astro.props;
+
+// 正文 alt 里的反引号按行内代码渲染，其余转义。
+const inline = (text: string) =>
+  text
+    .split(/(`[^`]+`)/)
+    .map((part) =>
+      part.startsWith('`') && part.endsWith('`')
+        ? `<code>${part.slice(1, -1).replace(/&/g, '&amp;').replace(/</g, '&lt;')}</code>`
+        : part.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+    )
+    .join('');
+
+const widths = [480, 768, 1152, 1536, 1920, src.width].filter((w) => w <= src.width);
+const maxWidth = Math.max(...widths);
+// 最大尺寸那一档同时给查看器和“打开原图”用，不额外产出资源。
+const full = await getImage({ src, width: maxWidth });
+const alt = title || desc;
+---
+
+<figure class="book-figure" data-figure>
+  <a class="figure-open" href={full.src} data-figure-open data-astro-reload aria-label={`放大查看：${alt}`}>
+    <Image
+      src={src}
+      alt={alt}
+      widths={widths}
+      sizes="(max-width: 50rem) calc(100vw - 3rem), 42rem"
+      loading="lazy"
+      decoding="async"
+    />
+  </a>
+  <figcaption>
+    <p class="figure-heading">
+      <span class="figure-number">图 {number}</span>
+      {title && <span class="figure-title">{title}</span>}
+    </p>
+    <p class="figure-desc" set:html={inline(desc)} />
+    <p class="figure-caption">
+      {figcaption && <span set:html={inline(figcaption)} />}
+      {source !== null && <span class="figure-source">图片来自 <Cite n={source} /></span>}
+    </p>
+  </figcaption>
+</figure>

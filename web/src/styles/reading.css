@@ -1,0 +1,623 @@
+/* 阅读排版。字号用 --reader-scale 驱动，正文、代码块和表格一起缩放。 */
+
+:root {
+  /*
+   * Starlight 负责所有框架控件；这里只覆写它公开的语义变量。
+   * 配色采用暖白纸面、墨色正文和深靛蓝强调，章节、链接与交互沿用同一语义。
+   */
+  --reader-paper: hsl(42 42% 99%);
+  --reader-paper-raised: hsl(40 31% 97%);
+  --reader-ink: hsl(222 30% 16%);
+  --reader-muted-ink: hsl(220 13% 40%);
+  --reader-indigo: hsl(224 66% 43%);
+  --reader-indigo-strong: hsl(224 74% 30%);
+
+  --sl-color-white: var(--reader-ink);
+  --sl-color-gray-1: hsl(222 25% 20%);
+  --sl-color-gray-2: hsl(222 18% 27%);
+  --sl-color-gray-3: var(--reader-muted-ink);
+  --sl-color-gray-4: hsl(220 10% 56%);
+  --sl-color-gray-5: hsl(220 18% 84%);
+  --sl-color-gray-6: hsl(40 24% 92%);
+  --sl-color-gray-7: var(--reader-paper-raised);
+  --sl-color-black: var(--reader-paper);
+  --sl-color-accent-low: hsl(224 62% 91%);
+  --sl-color-accent: var(--reader-indigo);
+  --sl-color-accent-high: var(--reader-indigo-strong);
+  --sl-color-text-accent: var(--reader-indigo);
+  --sl-color-bg-nav: hsl(42 30% 98%);
+  --sl-color-bg-sidebar: var(--reader-paper);
+  --sl-color-bg-inline-code: hsl(40 22% 95%);
+  --sl-color-hairline: hsl(220 16% 83%);
+  --sl-color-hairline-light: hsl(220 18% 89%);
+  --sl-color-hairline-shade: hsl(220 18% 91%);
+
+  --sl-content-width: 42rem;
+  --sl-line-height: 1.85;
+
+  /* 拉丁字形走 Newsreader，汉字、希腊字母和符号回退到源汉宋体。 */
+  --sl-font: 'Newsreader', 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', serif;
+  --sl-font-mono: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, 'Source Han Serif SC', monospace;
+
+  --reader-scale: 1;
+  --reader-muted: var(--sl-color-gray-3);
+}
+
+:root[data-theme='dark'] {
+  --reader-paper: hsl(225 24% 10%);
+  --reader-paper-raised: hsl(225 19% 14%);
+  --reader-ink: hsl(42 25% 96%);
+  --reader-muted-ink: hsl(220 12% 70%);
+  --reader-indigo: hsl(220 87% 70%);
+  --reader-indigo-strong: hsl(220 100% 84%);
+
+  --sl-color-white: var(--reader-ink);
+  --sl-color-gray-1: hsl(42 20% 91%);
+  --sl-color-gray-2: hsl(220 13% 78%);
+  --sl-color-gray-3: var(--reader-muted-ink);
+  --sl-color-gray-4: hsl(220 12% 49%);
+  --sl-color-gray-5: hsl(225 16% 20%);
+  --sl-color-gray-6: var(--reader-paper-raised);
+  --sl-color-black: var(--reader-paper);
+  --sl-color-accent-low: hsl(223 46% 23%);
+  --sl-color-accent: var(--reader-indigo);
+  --sl-color-accent-high: var(--reader-indigo-strong);
+  --sl-color-text-accent: var(--reader-indigo-strong);
+  --sl-color-bg-nav: hsl(225 20% 12%);
+  --sl-color-bg-sidebar: var(--reader-paper);
+  --sl-color-bg-inline-code: hsl(225 16% 17%);
+  --sl-color-hairline: hsl(224 15% 22%);
+  --sl-color-hairline-light: hsl(224 15% 19%);
+  --sl-color-hairline-shade: hsl(225 25% 8%);
+}
+
+/* 导航半透明只服务于滚动时的层次和可读性，不改变 Starlight 的结构或控件。 */
+.header {
+  background: color-mix(in srgb, var(--sl-color-bg-nav) 92%, transparent);
+  border-bottom-color: var(--sl-color-hairline-light);
+  backdrop-filter: blur(12px);
+}
+
+/* ---------- 正文缩放 ---------- */
+
+.sl-markdown-content {
+  font-size: calc(1rem * var(--reader-scale));
+}
+
+.sl-markdown-content :is(code, kbd, samp) {
+  font-size: calc(0.9rem * var(--reader-scale));
+}
+
+.sl-markdown-content :is(pre, table) {
+  font-size: calc(0.9rem * var(--reader-scale));
+}
+
+.sl-markdown-content :is(h2, h3, h4) {
+  font-weight: 600;
+}
+
+.sl-markdown-content > :first-child {
+  margin-top: 0;
+}
+
+/* ---------- 图与图注 ---------- */
+
+.book-figure {
+  margin: 1.75rem 0;
+}
+
+.book-figure .figure-open {
+  display: block;
+  border: 0;
+  cursor: zoom-in;
+}
+
+.book-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--sl-color-hairline);
+  background: var(--sl-color-bg-inline-code);
+  box-shadow: 0 0.65rem 1.5rem color-mix(in srgb, var(--sl-color-gray-1) 9%, transparent);
+}
+
+.book-figure figcaption {
+  margin-top: 0.6rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--sl-color-hairline);
+  max-width: 100%;
+}
+
+.figure-heading {
+  margin: 0;
+  font-size: calc(0.875rem * var(--reader-scale));
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.figure-number {
+  color: var(--sl-color-text-accent);
+  margin-right: 0.5em;
+}
+
+.figure-title {
+  color: var(--sl-color-white);
+}
+
+.figure-desc,
+.figure-caption {
+  margin: 0.35rem 0 0;
+  font-size: calc(0.875rem * var(--reader-scale));
+  line-height: 1.75;
+  color: var(--reader-muted);
+}
+
+.figure-caption {
+  color: var(--sl-color-gray-4);
+}
+
+.figure-source {
+  margin-left: 0.5em;
+  white-space: nowrap;
+}
+
+/* ---------- 引用与参考文献 ---------- */
+
+.cite {
+  text-decoration: none;
+  font-size: 0.85em;
+  vertical-align: 0.15em;
+  color: var(--sl-color-text-accent);
+  padding: 0 0.05em;
+}
+
+.cite:hover {
+  text-decoration: underline;
+}
+
+.cite:target,
+.references li:target {
+  background: var(--sl-color-accent-low);
+  border-radius: 3px;
+  outline: 2px solid var(--sl-color-accent-low);
+}
+
+.references {
+  padding-left: 1.4em;
+  font-size: calc(0.9rem * var(--reader-scale));
+}
+
+.references li {
+  margin: 0.35rem 0;
+  line-height: 1.7;
+  color: var(--reader-muted);
+}
+
+.references li:target {
+  color: var(--sl-color-white);
+}
+
+.ref-back {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.35em;
+  color: var(--sl-color-text-accent);
+  vertical-align: -0.1em;
+}
+
+/* Starlight 渲染 GFM 脚注时自带 ↩ 图标，两款字体都没有该字形。
+   这里显式指定系统符号字体，避免落到意料之外的字体上。 */
+.footnote-backref {
+  font-family: 'Apple Symbols', 'Segoe UI Symbol', 'Noto Sans Symbols 2', 'Source Han Serif SC', sans-serif;
+}
+
+/* ---------- 表格、代码、引用块 ---------- */
+
+.sl-markdown-content table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.sl-markdown-content blockquote {
+  color: var(--reader-muted);
+}
+
+.sl-markdown-content :not(pre) > code {
+  border-radius: 4px;
+}
+
+/* ---------- 阅读控制 ---------- */
+
+.reader-tools {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.reader-tools[hidden] {
+  display: none;
+}
+
+.reader-progress {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--sl-color-hairline);
+  overflow: hidden;
+}
+
+.reader-progress-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--sl-color-accent);
+  transform: scaleX(var(--reader-progress, 0));
+  transform-origin: left center;
+  transition: transform 120ms linear;
+}
+
+.reader-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--sl-text-xs);
+}
+
+.reader-percent {
+  min-width: 2.6em;
+  color: var(--reader-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.reader-group {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+
+.reader-tools button,
+.reader-tools .reader-link {
+  font: inherit;
+  color: var(--sl-color-text);
+  background: var(--sl-color-bg-inline-code);
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 5px;
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.6;
+}
+
+.reader-tools button:hover,
+.reader-tools .reader-link:hover {
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-text-accent);
+}
+
+.reader-tools button[aria-pressed='true'] {
+  background: var(--sl-color-accent-low);
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-white);
+}
+
+.reader-tools--sidebar {
+  margin-bottom: 0.9rem;
+}
+
+.reader-tools--bar {
+  display: none;
+}
+
+/* ---------- 专注模式 ---------- */
+
+/* 隐藏侧边栏要连外层 nav.sidebar 一起收起：只藏里面的 .sidebar-pane，
+   外层仍占着 300px 宽度。正文宽度交给 Starlight 自己的居中和 --sl-content-width，
+   不要在这里给 .main-frame 再加 max-width，否则会和内部定宽叠加，把正文压成窄条。 */
+html[data-focus='on'] .page > nav.sidebar,
+html[data-focus='on'] .sidebar-pane,
+html[data-focus='on'] .right-sidebar,
+html[data-focus='on'] .right-sidebar-container,
+html[data-focus='on'] .pagination,
+html[data-focus='on'] .mobile-toc {
+  display: none;
+}
+
+/* 桌面端 .main-frame 本身有 padding-inline-start = --sl-sidebar-width（18.75rem），
+   用来给左侧栏让位。侧边栏收起后这段留白还在，正文会被推到右边。
+   这里把行内内边距清零，再把正文列居中。 */
+html[data-focus='on'] .main-frame {
+  padding-inline: 0;
+}
+
+/* 右侧栏是 flex 容器里的一个 ASIDE.right-sidebar-container。
+   只藏它内部的 .right-sidebar 不管用，外层仍占位，要一起隐藏，
+   正文列才能真正拿到整行宽度。 */
+html[data-focus='on'] .main-pane,
+html[data-focus='on'] .lg\:sl-flex {
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+html[data-focus='on'] .content-panel {
+  max-width: calc(var(--sl-content-width) + 2 * var(--sl-content-pad-x));
+  margin-inline: auto;
+}
+
+/* 专注模式下右侧栏（含其中的阅读控制）被隐藏，桌面端另给一个常驻退出按钮。 */
+.reader-focus-exit {
+  display: none;
+  position: fixed;
+  top: calc(var(--sl-nav-height) + 0.75rem);
+  right: 1rem;
+  z-index: var(--sl-z-index-navbar);
+  font: inherit;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-text);
+  background: var(--sl-color-bg-nav);
+  border: 1px solid var(--sl-color-accent);
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  cursor: pointer;
+  box-shadow: var(--sl-shadow-md);
+}
+
+html[data-focus='on'] .reader-focus-exit {
+  display: inline-flex;
+}
+
+@media (max-width: 71.999rem) {
+  /* 窄屏底部控制条上本来就有「退出专注」，不再叠一个。 */
+  html[data-focus='on'] .reader-focus-exit {
+    display: none;
+  }
+}
+
+/* ---------- 桌面端右栏宽度 ---------- */
+
+/* Starlight 的右侧目录栏随视口一起变宽，目录文字用不到整栏宽度。
+   这里把右栏固定成目录需要的宽度，正文列加宽后在主栏内居中。
+   只作用于桌面端；窄屏用底部控制条，不受影响。 */
+@media (min-width: 72rem) {
+  :root {
+    --reader-toc-width: 18rem;
+    --sl-content-width: 46rem;
+  }
+
+  .right-sidebar-container {
+    width: var(--reader-toc-width);
+  }
+
+  /* Starlight 把目录文字列限制在视口宽度的 25%，右栏收窄后改成占满栏宽减去内边距。 */
+  .right-sidebar-panel .sl-container {
+    width: calc(var(--reader-toc-width) - 2 * var(--sl-sidebar-pad-x));
+    max-width: none;
+  }
+
+  /* 专注模式会隐藏右栏，正文需要占满整行，所以这条规则要排除专注模式。
+     data-has-sidebar 和 data-has-toc 就写在 html 上，属性选择器不能加空格。 */
+  html:not([data-focus='on'])[data-has-sidebar][data-has-toc] .main-pane {
+    width: calc(100% - var(--reader-toc-width));
+    --sl-content-margin-inline: auto;
+  }
+}
+
+/* ---------- 手机与平板：常驻控制条 ---------- */
+
+@media (max-width: 71.999rem) {
+  .reader-tools--sidebar {
+    display: none;
+  }
+
+  html[data-reader='on'] .reader-tools--bar {
+    display: grid;
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: var(--sl-z-index-toc);
+    padding: 0.4rem 0.75rem calc(0.4rem + env(safe-area-inset-bottom));
+    background: var(--sl-color-bg-nav);
+    border-top: 1px solid var(--sl-color-hairline);
+  }
+
+  /* 给固定控制条留出空间，避免它遮住正文末尾。 */
+  html[data-reader='on'] body {
+    padding-bottom: 3.5rem;
+  }
+}
+
+@media (min-width: 72rem) {
+  html[data-reader='on'] .reader-tools--bar {
+    display: none;
+  }
+}
+
+/* ---------- 打印 ---------- */
+
+@media print {
+  .reader-tools,
+  .highlights-toggle,
+  .highlight-selection,
+  .highlight-status,
+  .resume-banner,
+  dialog {
+    display: none !important;
+  }
+
+  .book-figure figcaption {
+    border-top-color: #999;
+  }
+}
+
+/* ---------- 首页版式 ---------- */
+
+.continue-reading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 auto 2rem;
+  max-width: 60rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 8px;
+  font-size: var(--sl-text-sm);
+  color: var(--reader-muted);
+}
+
+.continue-reading[hidden] {
+  display: none;
+}
+
+.continue-reading a {
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--sl-color-text-accent);
+}
+
+.continue-reading a::after {
+  content: ' →';
+}
+
+.editorial {
+  display: grid;
+  gap: 2rem;
+  align-items: start;
+  margin: 1.75rem 0 2.5rem;
+  padding-block: clamp(1.5rem, 4vw, 3rem);
+  border-block: 1px solid var(--sl-color-hairline-light);
+}
+
+.editorial-lead h2 {
+  margin-top: 0;
+  max-width: 20ch;
+  font-size: clamp(2rem, 3.4vw, 2.85rem);
+  line-height: 1.16;
+  letter-spacing: -0.025em;
+}
+
+.editorial-lead p {
+  max-width: 62ch;
+  margin: 0 0 1rem;
+}
+
+.editorial-loop {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  justify-items: center;
+}
+
+.editorial--single {
+  max-width: 62ch;
+}
+
+@media (min-width: 60rem) {
+  .editorial {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    gap: 3rem;
+  }
+
+  .editorial.editorial--single {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 章节入口仍由 Starlight 的 LinkCard 渲染；这里只加强阅读顺序和可点击反馈。 */
+.card-grid {
+  gap: 0.9rem;
+}
+
+.sl-link-card {
+  border-color: var(--sl-color-hairline);
+  background: color-mix(in srgb, var(--sl-color-bg) 90%, var(--reader-paper-raised));
+  box-shadow: 0 0.35rem 0.9rem color-mix(in srgb, var(--sl-color-gray-1) 5%, transparent);
+  transition:
+    border-color 160ms ease-out,
+    background 160ms ease-out,
+    box-shadow 160ms ease-out;
+}
+
+.sl-link-card:hover {
+  border-color: color-mix(in srgb, var(--sl-color-accent) 55%, var(--sl-color-hairline));
+  background: color-mix(in srgb, var(--sl-color-accent-low) 28%, var(--sl-color-bg));
+  box-shadow: 0 0.7rem 1.5rem color-mix(in srgb, var(--sl-color-gray-1) 10%, transparent);
+}
+
+.sl-link-card :is(h2, h3) {
+  color: var(--sl-color-white);
+}
+
+@media (max-width: 49.999rem) {
+  .editorial {
+    gap: 1.4rem;
+    margin-block: 1rem 1.75rem;
+    padding-block: 1.25rem 1.75rem;
+  }
+
+  .editorial-lead h2 {
+    font-size: clamp(1.9rem, 9vw, 2.4rem);
+  }
+}
+
+/* ---------- 排版打磨 ---------- */
+
+.sl-markdown-content > h2 {
+  margin-top: 2.6em;
+  padding-top: 0.2em;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+
+.sl-markdown-content h3 {
+  margin-top: 2em;
+}
+
+.sl-markdown-content h2 + p,
+.sl-markdown-content h3 + p {
+  margin-top: 0.6em;
+}
+
+.sl-markdown-content p {
+  text-wrap: pretty;
+}
+
+/* 中文长文的首行缩进按站点约定不加，靠段间距分隔；这里把段间距调匀。 */
+.sl-markdown-content > p {
+  margin-block: 1.05em;
+}
+
+.sl-markdown-content blockquote {
+  border-inline-start: 1px solid var(--sl-color-accent);
+  padding-inline-start: 1rem;
+}
+
+.sl-markdown-content table {
+  border-collapse: collapse;
+  width: fit-content;
+  min-width: min(100%, 32rem);
+}
+
+.sl-markdown-content table th {
+  background: var(--sl-color-bg-inline-code);
+  white-space: nowrap;
+}
+
+.sl-markdown-content table :is(th, td) {
+  padding: 0.45em 0.8em;
+  border-color: var(--sl-color-hairline);
+}
+
+.sl-markdown-content pre {
+  border-radius: 7px;
+}
+
+/* 目录与侧边栏跟着正文字号一起放大一档，避免正文放大后导航显得过小。 */
+.right-sidebar {
+  font-size: var(--sl-text-sm);
+}
+
+@media print {
+  .editorial {
+    grid-template-columns: 1fr;
+  }
+}

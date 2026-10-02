@@ -1,0 +1,399 @@
+/* 划重点与图片查看器。这些部件由脚本驱动，默认不出现。 */
+
+/* ---------- 入口按钮 ---------- */
+
+.highlights-toggle {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  z-index: var(--sl-z-index-toc);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font: inherit;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-text);
+  background: var(--sl-color-bg-nav);
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  box-shadow: var(--sl-shadow-md);
+}
+
+.highlights-toggle[hidden] {
+  display: none;
+}
+
+.highlights-toggle:hover {
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-text-accent);
+}
+
+#highlight-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--sl-color-text-accent);
+}
+
+@media (max-width: 71.999rem) {
+  /* 窄屏底部有常驻控制条，把入口抬上去 */
+  .highlights-toggle {
+    bottom: calc(3.8rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* ---------- 选区工具条 ---------- */
+
+.highlight-selection {
+  position: fixed;
+  z-index: calc(var(--sl-z-index-navbar) + 6);
+  display: flex;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border-radius: 7px;
+  background: var(--sl-color-bg-nav);
+  border: 1px solid var(--sl-color-hairline);
+  box-shadow: var(--sl-shadow-md);
+}
+
+.highlight-selection[hidden] {
+  display: none;
+}
+
+.highlight-selection button,
+.hl-dialog button,
+.hl-dialog .hl-import,
+.highlight-actions button {
+  font: inherit;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-text);
+  background: var(--sl-color-bg-inline-code);
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 5px;
+  padding: 0.2rem 0.65rem;
+  cursor: pointer;
+  line-height: 1.7;
+}
+
+.highlight-selection button:hover,
+.hl-dialog button:hover,
+.hl-dialog .hl-import:hover,
+.highlight-actions button:hover {
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-text-accent);
+}
+
+.hl-dialog button:disabled,
+.highlight-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.highlight-status {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  z-index: calc(var(--sl-z-index-navbar) + 7);
+  margin: 0;
+  max-width: min(34rem, calc(100vw - 2rem));
+  padding: 0;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-text-accent);
+}
+
+.highlight-status:empty {
+  display: none;
+}
+
+/* ---------- 正文里的高亮 ---------- */
+
+mark.hl {
+  background: color-mix(in srgb, var(--sl-color-accent) 28%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 0.05em;
+  cursor: pointer;
+}
+
+mark.hl:hover {
+  background: color-mix(in srgb, var(--sl-color-accent) 44%, transparent);
+}
+
+mark.hl:focus-visible {
+  outline: 2px solid var(--sl-color-accent);
+  outline-offset: 1px;
+}
+
+/* ---------- 点击高亮后的就地操作 ---------- */
+
+.hl-mark-actions {
+  position: fixed;
+  z-index: calc(var(--sl-z-index-navbar) + 6);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 7px;
+  background: var(--sl-color-bg-nav);
+  border: 1px solid var(--sl-color-hairline);
+  box-shadow: var(--sl-shadow-md);
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-gray-3);
+}
+
+.hl-mark-actions button {
+  font: inherit;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-text);
+  background: var(--sl-color-bg-inline-code);
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 5px;
+  padding: 0.15rem 0.55rem;
+  cursor: pointer;
+}
+
+/* ---------- 对话框 ---------- */
+
+.hl-dialog {
+  width: min(38rem, calc(100vw - 2rem));
+  max-height: min(80vh, 46rem);
+  overflow: auto;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 10px;
+  background: var(--sl-color-bg);
+  color: var(--sl-color-text);
+  box-shadow: var(--sl-shadow-lg);
+}
+
+.hl-dialog::backdrop {
+  background: color-mix(in srgb, var(--sl-color-black) 60%, transparent);
+}
+
+.hl-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.hl-dialog-head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.hl-icon-button {
+  padding: 0.1rem 0.5rem !important;
+}
+
+.hl-dialog-help {
+  margin: 0.4rem 0 0.7rem;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-gray-3);
+  line-height: 1.6;
+}
+
+.hl-backup-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.hl-import {
+  display: inline-flex;
+  align-items: center;
+}
+
+.hl-import input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#highlight-backup-json {
+  width: 100%;
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+}
+
+.hl-undo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.6rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--sl-color-hairline);
+  border-inline-start: 3px solid var(--sl-color-accent);
+  border-radius: 7px;
+  background: var(--sl-color-bg-inline-code);
+}
+
+.hl-undo[hidden] {
+  display: none;
+}
+
+.hl-undo p {
+  margin: 0;
+}
+
+#highlights-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+#highlights-list li {
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--sl-color-hairline);
+  border-inline-start: 3px solid var(--sl-color-accent);
+  border-radius: 7px;
+  background: var(--sl-color-bg-inline-code);
+}
+
+#highlights-list blockquote {
+  margin: 0 0 0.4rem;
+  font-size: calc(0.9rem * var(--reader-scale));
+  color: var(--sl-color-white);
+}
+
+.unmatched {
+  margin: 0 0 0.4rem;
+  font-size: calc(0.875rem * var(--reader-scale));
+  color: var(--sl-color-gray-3);
+  white-space: pre-wrap;
+}
+
+.unmatched {
+  color: var(--sl-color-orange-high);
+}
+
+.highlight-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+button.hl-danger {
+  border-color: color-mix(in srgb, var(--sl-color-red) 60%, var(--sl-color-hairline));
+  color: var(--sl-color-red-high);
+}
+
+button.hl-primary {
+  background: var(--sl-color-accent-low);
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-white);
+}
+
+button.hl-quiet {
+  color: var(--sl-color-gray-3);
+}
+
+/* ---------- 图片查看器 ---------- */
+
+.figure-dialog {
+  /* Starlight 的基础样式会重置 dialog 的默认外边距，显式用视口定位保证桌面端居中。 */
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(96vw, 72rem);
+  max-width: none;
+  height: min(92vh, 52rem);
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 10px;
+  background: var(--sl-color-bg);
+  color: var(--sl-color-text);
+  overflow: hidden;
+}
+
+.figure-dialog::backdrop {
+  background: color-mix(in srgb, var(--sl-color-black) 78%, transparent);
+}
+
+.figure-dialog:not([open]) {
+  display: none;
+}
+
+.figure-dialog-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--sl-color-hairline);
+  background: var(--sl-color-bg-nav);
+}
+
+.figure-dialog-bar button,
+.figure-dialog-bar a {
+  font: inherit;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-text);
+  background: var(--sl-color-bg-inline-code);
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 5px;
+  padding: 0.2rem 0.65rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.figure-dialog-bar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.figure-dialog-bar a {
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-text-accent);
+  margin-left: auto;
+}
+
+#figure-zoom-level {
+  min-width: 3.2em;
+  text-align: center;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-gray-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.figure-canvas {
+  height: calc(100% - 8.5rem);
+  overflow: auto;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: var(--sl-color-bg-inline-code);
+}
+
+.figure-canvas[data-zoomed='true'] {
+  place-items: start;
+  cursor: grab;
+}
+
+.figure-canvas[data-dragging='true'] {
+  cursor: grabbing;
+}
+
+.figure-canvas img {
+  display: block;
+  max-width: none;
+  height: auto;
+}
+
+.figure-dialog-caption {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-top: 1px solid var(--sl-color-hairline);
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-gray-3);
+}

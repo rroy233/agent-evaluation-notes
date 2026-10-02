@@ -1,0 +1,71 @@
+---
+title: AI Agent 测评笔记
+description: 行业内 AI Agent 测评最佳实践的学习笔记，综合 Anthropic、OpenAI 等企业与开源社区的公开资料。
+template: splash
+# hero.actions 是 YAML，用不了 BASE 和章节常量，这里写死全路径；
+# 改 slug 或 base 时，这一处和 astro.config.mjs 要一起改。
+hero:
+  title: AI Agent 测评笔记
+  tagline: 行业内 AI Agent 测评最佳实践的学习笔记，综合 Anthropic、OpenAI 等企业与开源社区的公开资料。
+  actions:
+    - text: 从第 1 章开始
+      link: /agent-evaluation-notes/chapters/agent-success-criteria/
+      icon: right-arrow
+      variant: primary
+---
+
+export const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import AgentLoop from '../../components/AgentLoop.astro';
+import { CHAPTERS, chapterByNumber } from '../../lib/chapters';
+
+export const ch2 = chapterByNumber(2);
+
+export const DESCRIPTIONS = {
+  'agent-success-criteria': '量什么、凭什么量、算不算成功，以及要不要要求每次都成功。',
+  'evaluation-task-design': '把成功标准写成可重复执行的任务：输入、环境、预期结果与行为约束。',
+  'grader-design': '谁来读证据、凭什么判定通过，以及如何用人工标注校准判定质量。',
+  'eval-set-and-results': '把任务和判定器组织成测评集，用固定条件跑实验并读懂版本差异。',
+  'production-feedback-and-evolution': '从线上记录里发现问题，确认归因后转化为下一轮离线测评任务。',
+};
+
+<section class="editorial">
+  <div class="editorial-lead">
+    <h2>测评流程的组成</h2>
+    <p>
+      判断一个 Agent 做得好不好，靠的是一套事先写清、事后可查的条件。这套条件要落成能反复执行的测评任务，
+      任务要配得上可信的判定器，判定结果要能放在一起比较，最后线上暴露的问题要能回到任务集里。
+    </p>
+    <p>
+      这份笔记按这条主线写。前四章给出可落地的对象：成功标准、任务规格、判定规则、可比较的实验结果。
+      第五章处理测评集如何随产品使用持续更新。每一章都产出一份下一步要用的东西。
+    </p>
+    <p>
+      笔记只讨论自建 Agent 的测评方法。公开基准、平台功能和代码接入只在支持方法时出现，不按产品文档展开。
+    </p>
+  </div>
+  <div class="editorial-loop">
+    <AgentLoop />
+  </div>
+</section>
+
+## 五章主线
+
+每一章解决的问题不同，产出也不同。第 1 章产出成功标准，第 2 章把标准落成任务，第 3 章给出判定规则，第 4 章让结果可比，第 5 章把线上反馈接回任务集。
+
+<CardGrid>
+  {CHAPTERS.map((c) => (
+    <LinkCard
+      title={`第 ${c.n} 章 ${c.title}`}
+      href={`${BASE}/chapters/${c.slug}/`}
+      description={DESCRIPTIONS[c.slug]}
+    />
+  ))}
+</CardGrid>
+
+## 怎么读
+
+按顺序读一遍大约需要两小时。想直接学习任务设计，可以从<a href={`${BASE}/chapters/${ch2.slug}/`}>第 2 章</a>开始。
+
+读的时候可以选中正文划重点。这些内容只存在你自己的浏览器里，不会上传，也可以导出成备份文件。

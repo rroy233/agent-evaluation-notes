@@ -1,0 +1,21 @@
+{
+  "name": "agent-evaluation-notes-site",
+  "type": "module",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "sync": "node scripts/sync-book.mjs",
+    "coverage": "node scripts/check-font-coverage.mjs",
+    "dev": "node scripts/sync-book.mjs && astro dev",
+    "build": "node scripts/sync-book.mjs && astro build && node scripts/check-font-coverage.mjs",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "3.7.4",
+    "@astrojs/starlight": "0.42.5",
+    "astro": "7.3.5",
+    "js-yaml": "4.3.2",
+    "sharp": "0.35.5"
+  }
+}

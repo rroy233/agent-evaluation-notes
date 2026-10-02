@@ -1,0 +1,10 @@
+---
+// 每页渲染一次：正文之前挂图片查看器，正文之后挂划重点的界面。
+import Default from '@astrojs/starlight/components/MarkdownContent.astro';
+import ReaderOverlays from './ReaderOverlays.astro';
+import Highlights from './Highlights.astro';
+---
+
+<ReaderOverlays />
+<Default><slot /></Default>
+<Highlights />

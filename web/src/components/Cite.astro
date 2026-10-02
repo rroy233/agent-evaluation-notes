@@ -1,0 +1,10 @@
+---
+// 正文里的引用编号。第一次出现在正文时带 id，供参考文献条目回跳。
+interface Props {
+  n: number;
+  anchor?: boolean;
+}
+const { n, anchor = false } = Astro.props;
+---
+
+<a class="cite" href={`#ref-${n}`} id={anchor ? `cite-${n}` : undefined} title={`跳转到参考文献 ${n}`}>[{n}]</a>

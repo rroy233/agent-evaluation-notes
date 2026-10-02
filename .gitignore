@@ -1,0 +1,7 @@
+# 参考文章存档，版权归原作者，不随仓库发布
+reference/
+
+# macOS
+.DS_Store
+
+AGENTS.md
