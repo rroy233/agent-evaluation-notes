@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rroy233.github.io/agent-evaluation-notes/sitemap-index.xml
