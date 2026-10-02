@@ -1,0 +1,91 @@
+---
+// 浏览量：浏览器异步向自建统计接口取当前路径的 pageviews。
+// 默认隐藏；请求成功就显示（该路径没记录时显示 0），失败或超时什么都不显示，也不阻塞正文。
+const path = Astro.url.pathname;
+---
+
+<p class="view-count" hidden data-view-count data-path={path} title="广告拦截器会影响统计"></p>
+
+<script>
+  const ENDPOINT = 'https://api.roy233.com/umami-stats/stats?app_id=agent-evaluation-notes';
+  const TIMEOUT = 5000;
+
+  const normalize = (p: string) => (p.length > 1 ? p.replace(/\/+$/, '') : p);
+
+  // 一次页面加载内复用同一份数据，客户端跳转不再重复请求。
+  let counts: Map<string, number> | undefined;
+  let pending: Promise<Map<string, number> | undefined> | undefined;
+
+  function loadCounts(): Promise<Map<string, number> | undefined> {
+    if (counts) return Promise.resolve(counts);
+    if (pending) return pending;
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT);
+    pending = fetch(ENDPOINT, { signal: controller.signal, headers: { accept: 'application/json' } })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((rows) => {
+        if (!Array.isArray(rows)) return undefined;
+        const map = new Map<string, number>();
+        for (const row of rows) {
+          const key = normalize(String(row?.name ?? ''));
+          if (key) map.set(key, (map.get(key) ?? 0) + Number(row?.pageviews ?? 0));
+        }
+        counts = map;
+        return map;
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        clearTimeout(timer);
+        pending = undefined;
+      });
+    return pending;
+  }
+
+  // 页面路径与接口里的路径都以 base 开头，正常一次命中；
+  // 万一站点被挂到别的路径下（本地预览、以后换域名），退化成唯一后缀匹配。
+  function lookup(map: Map<string, number>, path: string): number {
+    const exact = map.get(path);
+    if (exact !== undefined) return exact;
+    const suffix = [...map.entries()].filter(([key]) => key.endsWith(path));
+    return suffix.length === 1 ? suffix[0][1] : 0;
+  }
+
+  async function render() {
+    for (const el of document.querySelectorAll<HTMLElement>('[data-view-count]')) {
+      el.hidden = true;
+      const map = await loadCounts();
+      // 取数失败，或等待期间已经跳转（元素不在文档里），都不显示。
+      if (!map || !el.isConnected) continue;
+
+      const path = normalize(el.dataset.path ?? '');
+      const count = lookup(map, path);
+      const label = path.includes('/chapters/') ? '本文阅读' : '浏览';
+      const strong = document.createElement('strong');
+      strong.textContent = count.toLocaleString('zh-CN');
+      el.replaceChildren(document.createTextNode(`${label} `), strong, document.createTextNode(' 次'));
+      el.hidden = false;
+    }
+  }
+
+  document.addEventListener('astro:page-load', render);
+  // 兜底：脚本若在 astro:page-load 之后才执行，首屏也要渲染一次。
+  if (document.readyState !== 'loading') render();
+</script>
+
+<style>
+  /* 位于正文顶部、标题下方，与下一篇正文之间由 .sl-container 的间距规则处理。 */
+  .view-count {
+    /* 收窄到文字宽度，让悬停提示只在计数上触发。 */
+    width: fit-content;
+    margin: 0;
+    font-size: calc(0.85rem * var(--reader-scale));
+    color: var(--reader-muted);
+    cursor: help;
+  }
+
+  .view-count strong {
+    color: var(--sl-color-white);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

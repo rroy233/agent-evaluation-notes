@@ -1,10 +1,12 @@
 ---
-// 每页渲染一次：正文之前挂图片查看器，正文之后挂划重点的界面。
+// 每页渲染一次：浏览量在正文顶部，图片查看器和划重点的界面在正文之后。
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
 import ReaderOverlays from './ReaderOverlays.astro';
 import Highlights from './Highlights.astro';
+import ViewCount from './ViewCount.astro';
 ---
 
-<ReaderOverlays />
+<ViewCount />
 <Default><slot /></Default>
+<ReaderOverlays />
 <Highlights />
