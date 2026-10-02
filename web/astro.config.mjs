@@ -20,6 +20,17 @@ export default defineConfig({
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/rroy233/agent-evaluation-notes' }],
       head: [
         { tag: 'meta', attrs: { name: 'google-site-verification', content: 'TobQLxasHkiUnu8d55GDl5rd_RtjriQLYPaWAY2LrGo' } },
+        {
+          tag: 'script',
+          attrs: {
+            src: 'https://cloud.umami.is/script.js',
+            defer: true,
+            'data-website-id': '049ce45f-d776-4290-87ab-6a4b289dfb97',
+            'data-domains': 'rroy233.github.io',
+            'data-exclude-hash': 'true',
+            'data-do-not-track': 'true',
+          },
+        },
       ],
       locales: { root: { label: '简体中文', lang: 'zh-CN' } },
       customCss: ['./src/styles/fonts.css', './src/styles/reading.css', './src/styles/highlights.css'],
