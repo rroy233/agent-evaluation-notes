@@ -18,6 +18,9 @@ export default defineConfig({
       title: 'AI Agent 测评笔记',
       description: '一份整理行业 AI Agent 测评最佳实践的学习笔记，素材综合自 Anthropic、OpenAI、LangChain、Sierra、Langfuse 与美团公开发布的工程文章、技术博客和白皮书。',
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/rroy233/agent-evaluation-notes' }],
+      head: [
+        { tag: 'meta', attrs: { name: 'google-site-verification', content: 'TobQLxasHkiUnu8d55GDl5rd_RtjriQLYPaWAY2LrGo' } },
+      ],
       locales: { root: { label: '简体中文', lang: 'zh-CN' } },
       customCss: ['./src/styles/fonts.css', './src/styles/reading.css', './src/styles/highlights.css'],
       components: {
