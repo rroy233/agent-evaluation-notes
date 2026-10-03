@@ -162,6 +162,23 @@
   white-space: nowrap;
 }
 
+/* ---------- 正文内联强调 ---------- */
+
+/*
+ * <u> 是正文里的重点标记，不是链接。浏览器默认下划线取字体的 post.underlinePosition，
+ * 源汉宋体只有 -0.075em，落在汉字降部（-0.12em）区间内；拉丁字母的降部更深
+ * （Newsreader 约 -0.265em），所以默认线会紧贴文字并横穿 g、y 这类字母。
+ * 三处修正：线整体下移到降部之下；skip-ink 用 all（CJK 字体下 auto 常常不断开）；
+ * 颜色改用强调色并压到 82%，接上引用标记与图号的同一套语义。
+ * 用 em 而不是 px，是因为 --reader-scale 会随读者调字号，线宽与偏移要跟着等比缩放。
+ */
+.sl-markdown-content u {
+  text-decoration-color: color-mix(in srgb, var(--sl-color-accent) 82%, transparent);
+  text-decoration-thickness: 0.062em;
+  text-underline-offset: 0.16em;
+  text-decoration-skip-ink: all;
+}
+
 /* ---------- 引用与参考文献 ---------- */
 
 .cite {
