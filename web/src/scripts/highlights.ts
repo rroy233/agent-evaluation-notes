@@ -7,6 +7,7 @@
 // 3. 删除时把数据库里读到的那份内容交给撤销，撤销用新的 id 写回。
 import { anchor, parseBackup, samePassage, type Annotation } from '../lib/annotations';
 import { chapterKeyFromPath } from '../lib/chapter-key';
+import { placeToolbar } from '../lib/toolbar-placement';
 import {
   importHighlights,
   openHighlights,
@@ -22,6 +23,9 @@ import {
 const EXCLUDED = 'pre, figure, button, script, style, .footnotes, .katex';
 const CONTEXT = 64;
 const MAX_QUOTE = 10000;
+// 工具条不跟着选区即时闪现：拖动选择时 pointermove 会连续触发 selectionchange，
+// 立刻显示会挡住正在看的字，手一抖还会误点。等选区稳定这么久再出现。
+const TOOLBAR_DELAY = 220;
 let activeController: AbortController | undefined;
 
 export async function initHighlights(): Promise<void> {
@@ -53,6 +57,8 @@ export async function initHighlights(): Promise<void> {
   let busy = false;
   let selectionHandedOff = false;
   let messageTimer = 0;
+  let toolbarTimer = 0;
+  let toolbarRect: DOMRect | null = null;
 
   const notify = (message: string) => {
     if (dialog.open) dialogStatus.textContent = message;
@@ -66,9 +72,60 @@ export async function initHighlights(): Promise<void> {
   };
 
   const hideSelection = () => {
+    clearTimeout(toolbarTimer);
+    toolbarTimer = 0;
     toolbar.hidden = true;
     pending = null;
   };
+
+  /** 显示工具条。键盘用户在延迟到点之前按 Tab 时也走这里，所以可提前调用。 */
+  function showToolbar() {
+    clearTimeout(toolbarTimer);
+    toolbarTimer = 0;
+    if (pending && toolbarRect) positionToolbar(toolbarRect);
+  }
+
+  /**
+   * 工具条的包含块原点相对视口顶部的偏移。
+   *
+   * position: fixed 的包含块本应是视口，但这个页面上它落在了视口下方 24px 处
+   * （实测 style.top=0 时视口坐标是 24，且滚动后不变）。写坐标时把这个偏移减掉，
+   * style.top 就等于目标视口坐标。横向偏移为 0，不需要修正。
+   */
+  function toolbarOriginOffset(): { left: number; top: number } {
+    const top = parseFloat(toolbar.style.top || '0');
+    const left = parseFloat(toolbar.style.left || '0');
+    const box = toolbar.getBoundingClientRect();
+    return { left: box.left - left, top: box.top - top };
+  }
+
+  /**
+   * 把工具条摆到算好的位置。
+   *
+   * placeToolbar 给的是视口坐标；style.top / style.left 以包含块为参照，
+   * 两者相差一个固定原点，用 toolbarOriginOffset 量出来减掉即可，不做迭代反推。
+   */
+  function positionToolbar(rect: DOMRect) {
+    const initial = toolbar.hidden;
+    toolbar.hidden = false;
+    const previousVisibility = toolbar.style.visibility;
+    toolbar.style.visibility = 'hidden';
+    const box = toolbar.getBoundingClientRect();
+    const target = placeToolbar(
+      { top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width },
+      { width: box.width, height: box.height },
+      { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight },
+    );
+    const origin = toolbarOriginOffset();
+    toolbar.style.top = `${target.top - origin.top}px`;
+    toolbar.style.left = `${target.left - origin.left}px`;
+    toolbar.style.visibility = previousVisibility;
+
+    // 首次显示是从 display:none 唤醒的，量到的尺寸可能是 0；下一帧量准了再摆一次。
+    if (initial) requestAnimationFrame(() => {
+      if (!toolbar.hidden) positionToolbar(rect);
+    });
+  }
 
   function updateUndo() {
     undoPanel.hidden = removed.length === 0;
@@ -280,10 +337,10 @@ export async function initHighlights(): Promise<void> {
       suffix: map.text.slice(end, end + CONTEXT),
       createdAt: new Date().toISOString(),
     };
-    const rect = range.getBoundingClientRect();
-    toolbar.hidden = false;
-    toolbar.style.left = `${Math.max(12, Math.min(innerWidth - toolbar.offsetWidth - 12, rect.left + rect.width / 2 - toolbar.offsetWidth / 2))}px`;
-    toolbar.style.top = `${Math.max(12, Math.min(innerHeight - toolbar.offsetHeight - 12, rect.top > 140 ? rect.top - toolbar.offsetHeight - 10 : rect.bottom + 10))}px`;
+    toolbarRect = range.getBoundingClientRect();
+    // 每次 selectionchange 都重置计时：只有选区稳定一段时间后才显示
+    clearTimeout(toolbarTimer);
+    toolbarTimer = window.setTimeout(showToolbar, TOOLBAR_DELAY);
   }, { signal });
 
   // 点工具条不要清掉选区
@@ -298,11 +355,11 @@ export async function initHighlights(): Promise<void> {
       !event.shiftKey &&
       !selectionHandedOff &&
       pending &&
-      !toolbar.hidden &&
       !toolbar.contains(document.activeElement)
     ) {
       event.preventDefault();
       selectionHandedOff = true;
+      showToolbar(); // 键盘用户不必等延迟
       save.focus();
     }
   }, { signal });
