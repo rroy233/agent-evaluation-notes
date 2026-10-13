@@ -29,6 +29,9 @@ function storeTheme(theme: Theme): void {
 const systemPrefers = (): 'light' | 'dark' =>
   matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 
+/** 把偏好解析成实际要用的明暗。 */
+const resolveTheme = (theme: Theme): 'light' | 'dark' => (theme === 'auto' ? systemPrefers() : theme);
+
 function labelOf(root: HTMLElement, theme: Theme): string {
   if (theme === 'light') return root.dataset.labelLight ?? '';
   if (theme === 'dark') return root.dataset.labelDark ?? '';
@@ -49,7 +52,7 @@ export function syncThemeDropdowns(theme: Theme = loadTheme()): void {
 }
 
 function applyTheme(theme: Theme): void {
-  document.documentElement.dataset.theme = theme === 'auto' ? systemPrefers() : theme;
+  document.documentElement.dataset.theme = resolveTheme(theme);
   storeTheme(theme);
   syncThemeDropdowns(theme);
 }
@@ -62,6 +65,27 @@ export function initThemeDropdown(): void {
   const { signal } = controller;
 
   syncThemeDropdowns();
+
+  // ClientRouter 换页时，新页面服务端渲染的 data-theme 会覆盖用户的选择。
+  // 在 before-swap 里直接改即将插入的文档，换上去就是对的，不会闪一下。
+  document.addEventListener(
+    'astro:before-swap',
+    (event) => {
+      const next = (event as Event & { newDocument?: Document }).newDocument;
+      if (next) next.documentElement.dataset.theme = resolveTheme(loadTheme());
+    },
+    { signal },
+  );
+
+  // 兜底：换页后立刻再纠正一次（也顺带同步触发器上的图标和文字）。
+  document.addEventListener(
+    'astro:after-swap',
+    () => {
+      document.documentElement.dataset.theme = resolveTheme(loadTheme());
+      syncThemeDropdowns();
+    },
+    { signal },
+  );
 
   document.addEventListener(
     'click',
