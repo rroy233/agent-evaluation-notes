@@ -57,7 +57,7 @@ export const DESCRIPTIONS = {
 <CardGrid>
   {CHAPTERS.map((c) => (
     <LinkCard
-      title={`第 ${c.n} 章 ${c.title}`}
+      title={`第 ${c.n} 章 ${c.title['zh-CN']}`}
       href={`${BASE}/chapters/${c.slug}/`}
       description={DESCRIPTIONS[c.slug]}
     />

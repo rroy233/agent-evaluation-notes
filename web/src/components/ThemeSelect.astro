@@ -1,0 +1,101 @@
+---
+// 主题切换器。Starlight 默认用原生 <select>，这里换成和语言切换器同一套自定义下拉。
+// 偏好读写沿用 localStorage 的 starlight-theme，已有用户的选择不受影响。
+import { Icon } from '@astrojs/starlight/components';
+
+const t = Astro.locals.t;
+const options = [
+  { value: 'dark', label: t('themeSelect.dark'), icon: 'moon' },
+  { value: 'light', label: t('themeSelect.light'), icon: 'sun' },
+  { value: 'auto', label: t('themeSelect.auto'), icon: 'laptop' },
+] as const;
+---
+
+<div
+  class="nav-dropdown"
+  data-dropdown
+  data-theme-dropdown
+  data-theme-pref="auto"
+  data-label-auto={t('themeSelect.auto')}
+  data-label-light={t('themeSelect.light')}
+  data-label-dark={t('themeSelect.dark')}
+>
+  <button
+    type="button"
+    class="nav-dropdown__trigger"
+    data-dropdown-trigger
+    aria-expanded="false"
+    aria-haspopup="true"
+    aria-label={t('themeSelect.accessibleLabel')}
+  >
+    <span class="nav-dropdown__glyph">
+      {
+        options.map((option) => (
+          <span data-theme-glyph={option.value}>
+            <Icon name={option.icon} />
+          </span>
+        ))
+      }
+    </span>
+    <span class="nav-dropdown__value" data-theme-label>{t('themeSelect.auto')}</span>
+    <span class="nav-dropdown__caret">
+      <Icon name="down-caret" />
+    </span>
+  </button>
+  <ul class="nav-dropdown__panel" data-dropdown-panel hidden>
+    {
+      options.map((option) => (
+        <li>
+          <button
+            type="button"
+            class="nav-dropdown__item"
+            data-theme-option={option.value}
+            aria-current={option.value === 'auto' ? 'true' : undefined}
+          >
+            <span class="nav-dropdown__glyph">
+              <Icon name={option.icon} />
+            </span>
+            <span>{option.label}</span>
+            <span class="nav-dropdown__check">
+              <Icon name="approve-check" />
+            </span>
+          </button>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script is:inline>
+  // 尽早把触发器同步成实际偏好，否则会先显示「自动」再跳一下。
+  (() => {
+    let pref = 'auto';
+    try {
+      pref = localStorage.getItem('starlight-theme') || 'auto';
+    } catch {
+      /* 读不到就按自动 */
+    }
+    if (pref !== 'light' && pref !== 'dark') pref = 'auto';
+    const root = document.querySelector('[data-theme-dropdown]');
+    if (!root) return;
+    root.dataset.themePref = pref;
+    const label = root.querySelector('[data-theme-label]');
+    if (label) {
+      const key = pref === 'light' ? 'labelLight' : pref === 'dark' ? 'labelDark' : 'labelAuto';
+      label.textContent = root.dataset[key] || '';
+    }
+  })();
+</script>
+
+<script>
+  import { initDropdowns } from '../scripts/dropdown';
+  import { initThemeDropdown } from '../scripts/theme-dropdown';
+
+  const boot = () => {
+    initDropdowns();
+    initThemeDropdown();
+  };
+
+  document.addEventListener('astro:page-load', boot);
+  boot();
+</script>

@@ -7,6 +7,7 @@
 // 3. 删除时把数据库里读到的那份内容交给撤销，撤销用新的 id 写回。
 import { anchor, parseBackup, samePassage, type Annotation } from '../lib/annotations';
 import { chapterKeyFromPath } from '../lib/chapter-key';
+import { ui } from '../lib/ui';
 import { placeToolbar } from '../lib/toolbar-placement';
 import {
   importHighlights,
@@ -36,6 +37,8 @@ export async function initHighlights(): Promise<void> {
   const content = document.querySelector<HTMLElement>('.sl-markdown-content');
   const chapter = chapterKeyFromPath(location.pathname);
   if (!content || !chapter) return;
+
+  const t = ui(document.documentElement.lang);
 
   const get = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const toggle = get<HTMLButtonElement>('open-highlights');
@@ -129,7 +132,7 @@ export async function initHighlights(): Promise<void> {
 
   function updateUndo() {
     undoPanel.hidden = removed.length === 0;
-    get('highlight-undo-message').textContent = removed.length ? `已删除 ${removed.length} 处高亮。` : '';
+    get('highlight-undo-message').textContent = removed.length ? t.deletedCount(removed.length) : '';
   }
 
   /** 正文里的文本节点及其绝对偏移。跳过的区域不参与锚定，偏移与渲染结果一致。 */
@@ -179,7 +182,7 @@ export async function initHighlights(): Promise<void> {
         const mark = document.createElement('mark');
         mark.className = 'hl';
         mark.dataset.highlightIds = covering.map(({ record }) => record.id).join(' ');
-        mark.title = '点击可以删除这处高亮';
+        mark.title = t.markTitle;
         if (!entry.node.parentElement?.closest('a')) {
           mark.tabIndex = 0;
           mark.setAttribute('role', 'button');
@@ -204,7 +207,7 @@ export async function initHighlights(): Promise<void> {
       if (!position) {
         const message = document.createElement('p');
         message.className = 'unmatched';
-        message.textContent = '这段原文改动过或找不到了，保存的引文仍然保留。';
+        message.textContent = t.unmatched;
         li.append(message);
       }
 
@@ -213,7 +216,7 @@ export async function initHighlights(): Promise<void> {
 
       const jump = document.createElement('button');
       jump.type = 'button';
-      jump.textContent = '跳到原文';
+      jump.textContent = t.jumpToSource;
       jump.disabled = !position;
       jump.addEventListener('click', () => {
         const current = textMap();
@@ -240,8 +243,8 @@ export async function initHighlights(): Promise<void> {
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.className = 'hl-danger';
-      remove.textContent = '删除';
-      remove.setAttribute('aria-label', `删除高亮：${record.quote.slice(0, 60)}`);
+      remove.textContent = t.delete;
+      remove.setAttribute('aria-label', t.deleteAria(record.quote.slice(0, 60)));
       remove.addEventListener('click', () => void deleteHighlight(record.id, [...list.children].indexOf(li)));
 
       actions.append(jump, remove);
@@ -269,7 +272,7 @@ export async function initHighlights(): Promise<void> {
       await refresh();
       notify(message);
     } catch {
-      notify('这次改动没能保存。浏览器存储可能不可用或已满，请再试一次。');
+      notify(t.saveFailed);
     } finally {
       busy = false;
       save.disabled = false;
@@ -282,7 +285,7 @@ export async function initHighlights(): Promise<void> {
       const deleted = await removeHighlight(db!, id);
       if (deleted) removed.push(deleted);
       updateUndo();
-    }, '高亮已删除。');
+    }, t.deleted);
     if (rowIndex === undefined) return;
     const nextRow = list.children[Math.min(rowIndex, list.children.length - 1)];
     (nextRow?.querySelector('button') ?? get<HTMLButtonElement>('close-highlights')).focus();
@@ -373,7 +376,7 @@ export async function initHighlights(): Promise<void> {
       const latest = await readHighlights(db!, chapter);
       // 同一段引文已经存在就不再存一遍
       if (!latest.some((record) => samePassage(record, item))) await writeHighlights(db!, [item]);
-    }, '已加入本章高亮，只存在这台浏览器里。');
+    }, t.saved);
   });
 
   /* ---------- 点击高亮：就地删除 ---------- */
@@ -391,10 +394,10 @@ export async function initHighlights(): Promise<void> {
     actions = document.createElement('div');
     actions.className = 'hl-mark-actions';
     const tip = document.createElement('span');
-    tip.textContent = ids.length > 1 ? `这段有 ${ids.length} 处高亮` : '这处高亮';
+    tip.textContent = ids.length > 1 ? t.multiHighlights(ids.length) : t.thisHighlight;
     const remove = document.createElement('button');
     remove.type = 'button';
-    remove.textContent = '删除';
+    remove.textContent = t.delete;
     remove.addEventListener('click', () => {
       for (const id of ids) void deleteHighlight(id);
       closeActions();
@@ -402,7 +405,7 @@ export async function initHighlights(): Promise<void> {
     const cancel = document.createElement('button');
     cancel.type = 'button';
     cancel.className = 'hl-quiet';
-    cancel.textContent = '关闭';
+    cancel.textContent = t.close;
     cancel.addEventListener('click', closeActions);
     actions.append(tip, remove, cancel);
     document.body.append(actions);
@@ -451,7 +454,7 @@ export async function initHighlights(): Promise<void> {
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch {
-      notify('导出失败，请再试一次。');
+      notify(t.exportFailed);
     }
   });
 
@@ -459,11 +462,11 @@ export async function initHighlights(): Promise<void> {
     const output = get<HTMLTextAreaElement>('highlight-backup-json');
     try {
       await navigator.clipboard.writeText(output.value);
-      notify('备份已复制，粘贴到 .json 文件里保存即可。');
+      notify(t.copyDone);
     } catch {
       output.focus();
       output.select();
-      notify('请复制选中的备份文字，保存成 .json 文件。');
+      notify(t.copyManual);
     }
   });
 
@@ -471,12 +474,15 @@ export async function initHighlights(): Promise<void> {
     const file = importInput.files?.[0];
     if (!file) return;
     try {
-      const imported = parseBackup(JSON.parse(await file.text()), chapter);
+      const imported = parseBackup(JSON.parse(await file.text()), chapter, {
+        notBackup: t.importNotBackup,
+        invalidEntry: t.importInvalidEntry,
+      });
       await mutate(async () => {
         await importHighlights(db!, imported, chapter);
-      }, '备份已导入，已有的高亮保留不变。');
+      }, t.imported);
     } catch (error) {
-      notify(error instanceof Error ? error.message : '这个备份文件无法导入。');
+      notify(error instanceof Error ? error.message : t.importNotBackup);
     } finally {
       importInput.value = '';
     }
@@ -490,7 +496,7 @@ export async function initHighlights(): Promise<void> {
       await writeHighlights(db!, [{ ...record, id: crypto.randomUUID() }]);
       removed.pop();
       updateUndo();
-    }, '高亮已恢复。');
+    }, t.restored);
     if (undoPanel.hidden) get('close-highlights').focus();
   });
 
@@ -500,7 +506,7 @@ export async function initHighlights(): Promise<void> {
   toggle.addEventListener('click', () => {
     hideSelection();
     closeActions();
-    dialogStatus.textContent = db ? '' : '划重点存储不可用。请允许本站使用存储后刷新再试。';
+    dialogStatus.textContent = db ? '' : t.storageUnavailable;
     dialog.showModal();
   });
   get('close-highlights').addEventListener('click', () => dialog.close());
@@ -513,13 +519,13 @@ export async function initHighlights(): Promise<void> {
     importInput.disabled = false;
   } catch {
     db = undefined;
-    notify('划重点加载失败。请允许浏览器存储后刷新再试。');
+    notify(t.loadFailed);
     return;
   }
 
   // 其他标签页可能改了数据，回到本页时重读一次
   window.addEventListener('focus', () => {
-    if (!busy && !pending && !dialog.open) refresh().catch(() => notify('重新读取高亮失败，请刷新页面。'));
+    if (!busy && !pending && !dialog.open) refresh().catch(() => notify(t.refreshFailed));
   }, { signal });
 
   document.documentElement.dataset.highlighter = 'on';

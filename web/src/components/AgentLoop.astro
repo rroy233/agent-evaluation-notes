@@ -1,13 +1,10 @@
 ---
 // 首页的 Agent 循环动画。五步自动循环，支持减少动态偏好和离屏暂停。
 // 没有 JavaScript 时五个节点和当前说明仍然完整可读，只是不会自动前进。
-const steps = [
-  { label: '成功标准', desc: '先写清判断 Agent 好坏的依据：量什么、凭什么量、算不算成功。' },
-  { label: '测评任务', desc: '把标准写成可重复执行的任务：输入、环境、预期结果和行为约束。' },
-  { label: '判定器', desc: '定下谁来读证据、凭什么判定通过，并用人工标注校准判定质量。' },
-  { label: '测评集与结果', desc: '把任务和判定器组织成测评集，固定条件跑实验，读懂版本之间的差异。' },
-  { label: '发布与问题回收', desc: '用结果决定是否发布，再把线上发现的问题转成新的测评任务，补回第一步。' },
-];
+import { ui } from '../lib/ui';
+
+const t = ui(Astro.locals.starlightRoute?.lang);
+const steps = t.loopSteps;
 ---
 
 <div class="agent-loop" data-loop>
@@ -41,7 +38,7 @@ const steps = [
       {
         steps.map((step, i) => (
           <div class="loop-panel" data-loop-panel={i} hidden={i !== 0}>
-            <p class="loop-count">{`第 ${i + 1} 步，共 5 步`}</p>
+            <p class="loop-count">{t.loopCount(i + 1, steps.length)}</p>
             <p class="loop-title">{step.label}</p>
             <p class="loop-desc">{step.desc}</p>
           </div>

@@ -1,14 +1,20 @@
 ---
 // 浏览量：浏览器异步向自建统计接口取当前路径的 pageviews。
 // 默认隐藏；请求成功就显示（该路径没记录时显示 0），失败或超时什么都不显示，也不阻塞正文。
+import { ui } from '../lib/ui';
+
 const path = Astro.url.pathname;
+const t = ui(Astro.locals.starlightRoute?.lang);
 ---
 
-<p class="view-count" hidden data-view-count data-path={path} title="广告拦截器会影响统计"></p>
+<p class="view-count" hidden data-view-count data-path={path} title={t.adBlockHint}></p>
 
 <script>
+  import { ui } from '../lib/ui';
+
   const ENDPOINT = 'https://api.roy233.com/umami-stats/stats?app_id=agent-evaluation-notes';
   const TIMEOUT = 5000;
+  const t = ui(document.documentElement.lang);
 
   const normalize = (p: string) => (p.length > 1 ? p.replace(/\/+$/, '') : p);
 
@@ -60,10 +66,14 @@ const path = Astro.url.pathname;
 
       const path = normalize(el.dataset.path ?? '');
       const count = lookup(map, path);
-      const label = path.includes('/chapters/') ? '本文阅读' : '浏览';
+      const label = path.includes('/chapters/') ? t.articleReads : t.views;
       const strong = document.createElement('strong');
-      strong.textContent = count.toLocaleString('zh-CN');
-      el.replaceChildren(document.createTextNode(`${label} `), strong, document.createTextNode(' 次'));
+      strong.textContent = count.toLocaleString(document.documentElement.lang === 'en' ? 'en-US' : 'zh-CN');
+      if (document.documentElement.lang === 'en') {
+        el.replaceChildren(strong, document.createTextNode(` ${label}`));
+      } else {
+        el.replaceChildren(document.createTextNode(`${label} `), strong, document.createTextNode(t.times));
+      }
       el.hidden = false;
     }
   }

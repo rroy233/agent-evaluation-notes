@@ -20,7 +20,7 @@
 
 Agent 任务要复杂一些。Agent 可能查询数据库、修改文件、创建订单，甚至调用外部服务，因此仅仅保存“输入是什么、答案是什么”还不够。任务规格还必须说明**Agent 在什么环境中执行，以及执行完成以后环境应该发生什么变化**。
 
-![数据集条目列表。每一行是一条用例，包含 Item id、来源、状态、创建时间、Input 和 Expected Output 两列。示例里 Input 是国家名，Expected Output 是对应首都，例如 Input 为 Egypt 时 Expected Output 为 Cairo](images/dataset-input-expected-output.png)
+![数据集条目列表。每一行是一条用例，包含 Item id、来源、状态、创建时间、Input 和 Expected Output 两列。示例里 Input 是国家名，Expected Output 是对应首都，例如 Input 为 Egypt 时 Expected Output 为 Cairo](../images/dataset-input-expected-output.png)
 
 图注：数据集条目的结构只有输入和期望输出两项，逐行构成可反复运行的用例。图片来自 [3]。
 
@@ -58,7 +58,7 @@ Agent 任务要复杂一些。Agent 可能查询数据库、修改文件、创�
 
 
 
-![一条完整任务规格的字段示例。初始环境记工作目录下已有的数据文件、已配置的账号权限和可用的工具；prompt 记用户请求；expected behavior 记必须发生的两步动作；结果层评价标准检查是否产出文件、金额是否与源数据一致、是否包含对比分析；效率与安全层评价标准检查总耗时和是否存在未经确认的写操作或数据外发](images/task-spec-fields.png)
+![一条完整任务规格的字段示例。初始环境记工作目录下已有的数据文件、已配置的账号权限和可用的工具；prompt 记用户请求；expected behavior 记必须发生的两步动作；结果层评价标准检查是否产出文件、金额是否与源数据一致、是否包含对比分析；效率与安全层评价标准检查总耗时和是否存在未经确认的写操作或数据外发](../images/task-spec-fields.png)
 
 图注：一条填好的任务规格，把输入、预期行为、预期结果和约束分成不同栏目，并按必须通过与加分两类标注检查项。图片来自 [7]。
 

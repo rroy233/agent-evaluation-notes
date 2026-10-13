@@ -3,13 +3,14 @@
 import { chapterBySlug } from './chapters';
 
 export const BOOK_ID = 'agent-evaluation-notes';
-/** 内容语种，参与章节键的组成 */
-export const EDITION = 'zh-CN';
 
 export function chapterKeyFromPath(pathname: string): string | null {
-  const match = pathname.match(/\/chapters\/([^/]+)\/?$/);
+  const match = pathname.match(/\/(?:en\/)?chapters\/([^/]+)\/?$/);
   const chapter = match ? chapterBySlug(match[1]) : undefined;
-  return chapter ? `${BOOK_ID}:${EDITION}:${chapter.slug}` : null;
+  if (!chapter) return null;
+  // 内容语种参与章节键的组成，中文与英文版的高亮各自独立。
+  const edition = pathname.includes('/en/') ? 'en' : 'zh-CN';
+  return `${BOOK_ID}:${edition}:${chapter.slug}`;
 }
 
 /** 划重点按「书 + 语种 + 章节」限定范围，键里三段都要对上。 */

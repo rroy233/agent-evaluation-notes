@@ -3,4 +3,5 @@ dist/
 .astro/
 .fonts-src/
 src/content/docs/chapters/
+src/content/docs/en/chapters/
 dev/

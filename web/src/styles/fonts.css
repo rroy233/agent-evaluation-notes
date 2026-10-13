@@ -1,4 +1,4 @@
-/* 字体全部来自站内，不请求外部域。子集由 dev/subset-fonts.py 生成。 */
+/* 字体全部来自站内，不请求外部域。整份字体由 dev/build-fonts.py 转 woff2，不做子集化。 */
 @font-face {
   font-family: 'Newsreader';
   src: url('../assets/fonts/Newsreader-Roman.woff2') format('woff2');

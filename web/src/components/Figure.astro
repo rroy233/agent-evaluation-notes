@@ -5,6 +5,7 @@
 // data-astro-reload 让 ClientRouter 不接管这条链接；没有 JavaScript 时仍可打开原图。
 import { Image, getImage, type ImageMetadata } from 'astro:assets';
 import Cite from './Cite.astro';
+import { ui } from '../lib/ui';
 
 interface Props {
   src: ImageMetadata;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const { src, title = '', desc, number, figcaption, source = null } = Astro.props;
+const t = ui(Astro.locals.starlightRoute?.lang);
 
 // 正文 alt 里的反引号按行内代码渲染，其余转义。
 const inline = (text: string) =>
@@ -36,7 +38,7 @@ const alt = title || desc;
 ---
 
 <figure class="book-figure" data-figure>
-  <a class="figure-open" href={full.src} data-figure-open data-astro-reload aria-label={`放大查看：${alt}`}>
+  <a class="figure-open" href={full.src} data-figure-open data-astro-reload aria-label={t.figureEnlarge(alt)}>
     <Image
       src={src}
       alt={alt}
@@ -48,13 +50,13 @@ const alt = title || desc;
   </a>
   <figcaption>
     <p class="figure-heading">
-      <span class="figure-number">图 {number}</span>
+      <span class="figure-number">{t.figureNumber(number)}</span>
       {title && <span class="figure-title">{title}</span>}
     </p>
     <p class="figure-desc" set:html={inline(desc)} />
     <p class="figure-caption">
       {figcaption && <span set:html={inline(figcaption)} />}
-      {source !== null && <span class="figure-source">图片来自 <Cite n={source} /></span>}
+      {source !== null && <span class="figure-source">{t.figureSource} <Cite n={source} /></span>}
     </p>
   </figcaption>
 </figure>

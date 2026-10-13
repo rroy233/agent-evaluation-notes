@@ -2,17 +2,20 @@
 // 阅读控制：字号、专注模式、章内进度。
 // 桌面端放在右侧目录上方，手机和平板固定在底部。
 // 默认 hidden，脚本初始化后由 [data-reader="on"] 显示，无 JavaScript 时这些控件不出现。
+import { ui } from '../lib/ui';
+
 interface Props {
   variant: 'sidebar' | 'bar';
 }
 const { variant } = Astro.props;
+const t = ui(Astro.locals.starlightRoute?.lang);
 ---
 
 <div class={`reader-tools reader-tools--${variant}`} hidden data-reader-tools>
   <div
     class="reader-progress"
     role="progressbar"
-    aria-label="本页阅读进度"
+    aria-label={t.progressAria}
     aria-valuemin="0"
     aria-valuemax="100"
     aria-valuenow="0"
@@ -22,18 +25,22 @@ const { variant } = Astro.props;
   </div>
   <div class="reader-row">
     <span class="reader-percent" data-reader-percent>0%</span>
-    <div class="reader-group" role="group" aria-label="字号">
-      <button type="button" data-reader-size="down" title="减小字号">A−</button>
-      <button type="button" data-reader-size="up" title="增大字号">A+</button>
+    <div class="reader-group" role="group" aria-label={t.fontGroup}>
+      <button type="button" data-reader-size="down" title={t.fontSmaller}>A−</button>
+      <button type="button" data-reader-size="up" title={t.fontLarger}>A+</button>
     </div>
-    <button type="button" data-reader-focus aria-pressed="false" title="专注模式：隐藏导航，只留正文">专注</button>
+    <button type="button" data-reader-focus aria-pressed="false" title={t.focusTitle}>{t.focusOn}</button>
   </div>
 </div>
 
 <script>
+  import { ui } from '../lib/ui';
+
   const SIZES = [0.9, 1, 1.12, 1.25, 1.42];
   const K_SIZE = 'reader:v1:scale';
   const K_FOCUS = 'reader:v1:focus';
+
+  const t = ui(document.documentElement.lang);
 
   const store = {
     get(key: string): string | null {
@@ -63,7 +70,7 @@ const { variant } = Astro.props;
     exitButton = document.createElement('button');
     exitButton.type = 'button';
     exitButton.className = 'reader-focus-exit';
-    exitButton.textContent = '退出专注';
+    exitButton.textContent = t.focusOff;
     exitButton.addEventListener('click', () => applyFocus(false));
     document.body.append(exitButton);
   }
@@ -85,7 +92,7 @@ const { variant } = Astro.props;
     root.dataset.focus = on ? 'on' : 'off';
     for (const b of document.querySelectorAll<HTMLButtonElement>('[data-reader-focus]')) {
       b.setAttribute('aria-pressed', String(on));
-      b.textContent = on ? '退出专注' : '专注';
+      b.textContent = on ? t.focusOff : t.focusOn;
     }
     store.set(K_FOCUS, on ? '1' : '0');
   }

@@ -22,11 +22,11 @@
 
 | 章节 | 主题 | 正文 |
 | --- | --- | --- |
-| 第 1 章 Agent 的成功标准 | 量什么、凭什么量、算不算成功 | [book/chapter1.md](book/chapter1.md) |
-| 第 2 章 测评任务设计 | 把成功标准写成可重复执行的任务 | [book/chapter2.md](book/chapter2.md) |
-| 第 3 章 判定器设计 | 谁来判、按什么规则判、如何校准 | [book/chapter3.md](book/chapter3.md) |
-| 第 4 章 组织测评集并解读实验结果 | 固定实验条件，比较版本，复核个案 | [book/chapter4.md](book/chapter4.md) |
-| 第 5 章 生产反馈与测评集演进 | 把线上暴露的问题转成离线回归任务 | [book/chapter5.md](book/chapter5.md) |
+| 第 1 章 Agent 的成功标准 | 量什么、凭什么量、算不算成功 | [book/cn/chapter1.md](book/cn/chapter1.md) |
+| 第 2 章 测评任务设计 | 把成功标准写成可重复执行的任务 | [book/cn/chapter2.md](book/cn/chapter2.md) |
+| 第 3 章 判定器设计 | 谁来判、按什么规则判、如何校准 | [book/cn/chapter3.md](book/cn/chapter3.md) |
+| 第 4 章 组织测评集并解读实验结果 | 固定实验条件，比较版本，复核个案 | [book/cn/chapter4.md](book/cn/chapter4.md) |
+| 第 5 章 生产反馈与测评集演进 | 把线上暴露的问题转成离线回归任务 | [book/cn/chapter5.md](book/cn/chapter5.md) |
 
 ## 贡献
 

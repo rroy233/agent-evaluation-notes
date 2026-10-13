@@ -1,5 +1,10 @@
 ---
 // 每张卡片保留一段连续上下文，荧光标记其中最能概括文章观点的句子。
+import { ui } from '../lib/ui';
+
+const t = ui(Astro.locals.starlightRoute?.lang);
+const lang = Astro.locals.starlightRoute?.lang;
+
 const sources = [
   {
     mark: 'A',
@@ -86,6 +91,14 @@ const sources = [
     before: '评测服务于真实业务中的研发、上线、回归、优化和规模化落地。观测记录每一步输入、输出和中间过程，为定位问题提供依据。',
     highlight: '评测的核心目的是回答 Agent 的好不好，以及到底哪里好、哪里不好。',
     after: '评测同时关注任务结果、执行过程、效率和风险。',
+    en: {
+      organisation: 'Meituan',
+      author: 'Fulfillment Technology Team',
+      title: 'Agent Evaluation: A Beginner-to-Advanced Guide',
+      before: 'Evaluation serves R&D, launch, regression, optimization, and scale-out in real business. It records each step of input, output, and intermediate process to help locate issues.',
+      highlight: 'The core purpose of evaluation is to answer whether an agent is good, and exactly where it is or is not.',
+      after: 'Evaluation looks at task results, execution process, efficiency, and risk together.',
+    },
     href: 'https://tech.meituan.com/2026/08/07/Agent-Evaluation.html',
     color: 'hsl(12 78% 50%)',
   },
@@ -97,16 +110,26 @@ const sources = [
     before: 'Agent 上线后，在线评测和监控会持续产出异常信号。团队通过案例挖掘和归因，判断问题来自评测集、标准，还是 Agent 本身。',
     highlight: '评测是一门实践科学。',
     after: '每次迭代都需要结合业务特点调整做法，并关注每个做法要解决的问题。',
+    en: {
+      organisation: 'Meituan',
+      author: 'Turing Agent Evaluation',
+      title: 'Agent Evaluation White Paper, Part 01: An Overview',
+      before: 'After an agent ships, online evaluation and monitoring keep producing anomaly signals. Teams use case mining and attribution to tell whether a problem comes from the eval set, the criteria, or the agent itself.',
+      highlight: 'Evaluation is a practical science.',
+      after: 'Each iteration adjusts the approach to the business and keeps sight of the problem each practice is meant to solve.',
+    },
     href: 'https://tech.meituan.com/2026/09/10/Agent-Evaluation-White-Paper-01.html',
     color: 'hsl(12 78% 50%)',
   },
 ];
+
+const cards = sources.map((s) => (lang === 'en' && s.en ? { ...s, ...s.en } : s));
 ---
 
-<section class="reference-deck" data-reference-deck aria-label="文章卡片轮播">
+<section class="reference-deck" data-reference-deck aria-label={t.deckAria}>
   <div class="reference-deck-stage">
     {
-      sources.map((source, index) => (
+      cards.map((source, index) => (
         <article
           class="reference-card"
           data-reference-card={index}
@@ -117,10 +140,10 @@ const sources = [
           <div class="reference-card-topline">
             <span class="reference-logo" aria-hidden="true">{source.mark}</span>
             <span class="reference-org">{source.organisation}</span>
-            <a href={source.href} target="_blank" rel="noreferrer" aria-label={`打开 ${source.title} 原文`}>↗</a>
+            <a href={source.href} target="_blank" rel="noreferrer" aria-label={t.openSource(source.title)}>↗</a>
           </div>
           <h3>{source.title}</h3>
-          <p class="reference-author">作者 · {source.author}</p>
+          <p class="reference-author">{t.authorPrefix}{source.author}</p>
           <p class="reference-excerpt">
             {source.before} <span class="reference-highlight">{source.highlight}</span> {source.after}
           </p>

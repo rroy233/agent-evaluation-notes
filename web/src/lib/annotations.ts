@@ -42,7 +42,11 @@ export function anchor(text: string, item: Annotation): { start: number; end: nu
 }
 
 /** 备份文件在整份校验通过之前不写入任何一条记录。 */
-export function parseBackup(value: unknown, expectedChapter: string): Annotation[] {
+export function parseBackup(
+  value: unknown,
+  expectedChapter: string,
+  messages?: { notBackup?: string; invalidEntry?: string },
+): Annotation[] {
   const data = value as { format?: unknown; version?: unknown; highlights?: unknown } | null;
   if (
     !data ||
@@ -50,7 +54,7 @@ export function parseBackup(value: unknown, expectedChapter: string): Annotation
     (data.version !== 1 && data.version !== BACKUP_VERSION) ||
     !Array.isArray(data.highlights)
   ) {
-    throw new Error('请选择由本站导出的高亮备份文件。');
+    throw new Error(messages?.notBackup ?? '请选择由本站导出的高亮备份文件。');
   }
   return data.highlights.map((item: unknown) => {
     const a = item as Annotation | null;
@@ -74,7 +78,7 @@ export function parseBackup(value: unknown, expectedChapter: string): Annotation
       typeof a.createdAt !== 'string' ||
       !Number.isFinite(Date.parse(a.createdAt))
     ) {
-      throw new Error('备份里有一条高亮不合法，或属于别的章节。没有导入任何内容。');
+      throw new Error(messages?.invalidEntry ?? '备份里有一条高亮不合法，或属于别的章节。没有导入任何内容。');
     }
     return {
       id: a.id,

@@ -5,9 +5,8 @@
   "version": "0.1.0",
   "scripts": {
     "sync": "node scripts/sync-book.mjs",
-    "coverage": "node scripts/check-font-coverage.mjs",
     "dev": "node scripts/sync-book.mjs && astro dev",
-    "build": "node scripts/sync-book.mjs && astro build && node scripts/check-font-coverage.mjs",
+    "build": "node scripts/sync-book.mjs && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },

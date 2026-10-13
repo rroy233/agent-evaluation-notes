@@ -5,8 +5,8 @@ import sitemap from '@astrojs/sitemap';
 import { CHAPTERS } from './src/lib/chapters.ts';
 
 // 站点地址是 https://rroy233.github.io/agent-evaluation-notes/。
-// Starlight 会给侧边栏的 link 自动加上 base 前缀，
-// 这里再手工拼一次会得到 /agent-evaluation-notes/agent-evaluation-notes/，所以一律写站内绝对路径。
+// Starlight 会给侧边栏的 link 自动加上 base 前缀（多语种时还会加 /en/），
+// 这里再手工拼一次会得到重复前缀，所以一律写站内绝对路径或内部 slug。
 const BASE = '/agent-evaluation-notes';
 
 export default defineConfig({
@@ -15,7 +15,11 @@ export default defineConfig({
   image: { layout: 'constrained', responsiveStyles: true },
   integrations: [
     starlight({
-      title: 'AI Agent 测评笔记',
+      defaultLocale: 'root',
+      title: {
+        'zh-CN': 'AI Agent 测评笔记',
+        en: 'AI Agent Evaluation Notes',
+      },
       description: '一份整理行业 AI Agent 测评最佳实践的学习笔记，素材综合自 Anthropic、OpenAI、LangChain、Sierra、Langfuse 与美团公开发布的工程文章、技术博客和白皮书。',
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/rroy233/agent-evaluation-notes' }],
       head: [
@@ -32,25 +36,46 @@ export default defineConfig({
           },
         },
       ],
-      locales: { root: { label: '简体中文', lang: 'zh-CN' } },
-      customCss: ['./src/styles/fonts.css', './src/styles/reading.css', './src/styles/highlights.css'],
+      locales: {
+        root: { label: '简体中文', lang: 'zh-CN' },
+        en: { label: 'English', lang: 'en' },
+      },
+      customCss: [
+        './src/styles/fonts.css',
+        './src/styles/reading.css',
+        './src/styles/highlights.css',
+        './src/styles/nav-dropdown.css',
+      ],
       components: {
         Head: './src/components/Head.astro',
         TableOfContents: './src/components/TableOfContents.astro',
         MobileTableOfContents: './src/components/MobileTableOfContents.astro',
         MarkdownContent: './src/components/MarkdownContent.astro',
         Hero: './src/components/Hero.astro',
+        LanguageSelect: './src/components/LanguageSelect.astro',
+        ThemeSelect: './src/components/ThemeSelect.astro',
       },
       tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 3 },
       pagination: true,
       sidebar: [
-        { label: '首页', link: '/' },
+        { label: '首页', translations: { en: 'Home' }, link: '/' },
         {
           label: '正文',
-          items: CHAPTERS.map((c) => ({ label: `第 ${c.n} 章 ${c.title}`, slug: `chapters/${c.slug}` })),
+          translations: { en: 'Chapters' },
+          items: CHAPTERS.map((c) => ({
+            label: `第 ${c.n} 章 ${c.title['zh-CN']}`,
+            translations: { en: `Chapter ${c.n} ${c.title.en}` },
+            slug: `chapters/${c.slug}`,
+          })),
         },
       ],
     }),
-    sitemap(),
+    sitemap({
+      // 中文是 root（无路径前缀），英文是 /en/。键匹配路径段，值是 hreflang 的 lang。
+      i18n: {
+        defaultLocale: 'zh',
+        locales: { zh: 'zh-CN', en: 'en' },
+      },
+    }),
   ],
 });

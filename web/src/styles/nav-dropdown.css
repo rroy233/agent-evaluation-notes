@@ -1,0 +1,122 @@
+/* 顶栏自定义下拉菜单。语言与主题切换共用，替换 Starlight 默认的原生 select。 */
+
+.nav-dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--sl-color-gray-2);
+  font: inherit;
+  font-size: var(--sl-text-sm);
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+.nav-dropdown__trigger:hover,
+.nav-dropdown[data-dropdown-open] > .nav-dropdown__trigger {
+  color: var(--sl-color-white);
+  background: var(--sl-color-gray-6);
+}
+
+.nav-dropdown__trigger:focus-visible,
+.nav-dropdown__item:focus-visible {
+  outline: 2px solid var(--sl-color-accent);
+  outline-offset: 1px;
+}
+
+.nav-dropdown__glyph,
+.nav-dropdown__caret {
+  display: inline-flex;
+  font-size: 0.95em;
+}
+
+.nav-dropdown__caret {
+  opacity: 0.7;
+  transition: transform 160ms ease;
+}
+
+.nav-dropdown[data-dropdown-open] > .nav-dropdown__trigger .nav-dropdown__caret {
+  transform: rotate(180deg);
+}
+
+/* 主题触发器按当前偏好只显示一个图标 */
+.nav-dropdown[data-theme-dropdown] .nav-dropdown__trigger [data-theme-glyph] {
+  display: none;
+}
+
+.nav-dropdown[data-theme-pref='light'] .nav-dropdown__trigger [data-theme-glyph='light'],
+.nav-dropdown[data-theme-pref='dark'] .nav-dropdown__trigger [data-theme-glyph='dark'],
+.nav-dropdown[data-theme-pref='auto'] .nav-dropdown__trigger [data-theme-glyph='auto'] {
+  display: inline-flex;
+}
+
+.nav-dropdown__panel {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  inset-inline-end: 0;
+  z-index: 30;
+  min-width: 9.5rem;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 0.6rem;
+  background: var(--sl-color-bg-nav);
+  box-shadow: 0 0.75rem 1.6rem rgb(0 0 0 / 18%);
+}
+
+.nav-dropdown__panel[hidden] {
+  display: none;
+}
+
+.nav-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--sl-color-gray-2);
+  font: inherit;
+  font-size: var(--sl-text-sm);
+  line-height: 1.4;
+  text-align: start;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.nav-dropdown__item:hover {
+  color: var(--sl-color-white);
+  background: var(--sl-color-gray-6);
+}
+
+.nav-dropdown__item[aria-current='true'] {
+  color: var(--sl-color-accent-high);
+  font-weight: 600;
+}
+
+.nav-dropdown__check {
+  display: inline-flex;
+  margin-inline-start: auto;
+  font-size: 0.85em;
+  opacity: 0;
+}
+
+.nav-dropdown__item[aria-current='true'] .nav-dropdown__check {
+  opacity: 1;
+}

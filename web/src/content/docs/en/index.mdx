@@ -1,0 +1,72 @@
+---
+title: AI Agent Evaluation Notes
+description: A learner's guide to industry best practices for evaluating AI agents, synthesized from public engineering articles and technical blogs by Anthropic, OpenAI, LangChain, Sierra, Langfuse, and Meituan.
+template: splash
+# hero.actions is YAML and can't use BASE or chapter constants, so the full path is hardcoded here.
+hero:
+  title: AI Agent Evaluation Notes
+  tagline: A learner's guide to industry best practices for evaluating AI agents.
+  actions:
+    - text: Start at Chapter 1
+      link: /agent-evaluation-notes/en/chapters/agent-success-criteria/
+      icon: right-arrow
+      variant: primary
+---
+
+export const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import AgentLoop from '../../../components/AgentLoop.astro';
+import { CHAPTERS, chapterByNumber } from '../../../lib/chapters';
+
+export const ch2 = chapterByNumber(2);
+
+export const DESCRIPTIONS = {
+  'agent-success-criteria': 'What to measure, what evidence counts, and what counts as success — and whether every run must succeed.',
+  'evaluation-task-design': 'Turn success criteria into repeatable tasks: inputs, environment, expected results, and behavioral constraints.',
+  'grader-design': 'Who reads the evidence, what decides a pass, and how human labels calibrate grading quality.',
+  'eval-set-and-results': 'Organize tasks and graders into eval sets, run experiments under fixed conditions, and read version differences.',
+  'production-feedback-and-evolution': 'Find issues in production traces, confirm attribution, then turn them into the next round of offline eval tasks.',
+};
+
+<section class="editorial">
+  <div class="editorial-lead">
+    <h2>What goes into evaluation</h2>
+    <p>
+      Judging whether an agent is good comes down to a set of conditions written in advance and checkable afterwards.
+      Those conditions become repeatable eval tasks, the tasks need trustworthy graders, the results need to be comparable,
+      and issues found in production need to feed back into the task set.
+    </p>
+    <p>
+      The notes follow this thread. The first four chapters build concrete artifacts — success criteria, task specs,
+      grading rules, and comparable experiment results. Chapter 5 covers how the eval set keeps evolving as the product is used.
+    </p>
+    <p>
+      The notes cover methods for evaluating your own agents. Public benchmarks, platform features, and code integration
+      appear only when they support a method, never as a product tour.
+    </p>
+  </div>
+  <div class="editorial-loop">
+    <AgentLoop />
+  </div>
+</section>
+
+## The five-chapter thread
+
+Each chapter solves a different problem and produces a different artifact: Chapter 1 produces success criteria, Chapter 2 turns them into tasks, Chapter 3 gives grading rules, Chapter 4 makes results comparable, and Chapter 5 feeds production signals back into the task set.
+
+<CardGrid>
+  {CHAPTERS.map((c) => (
+    <LinkCard
+      title={`Chapter ${c.n} ${c.title.en}`}
+      href={`${BASE}/en/chapters/${c.slug}/`}
+      description={DESCRIPTIONS[c.slug]}
+    />
+  ))}
+</CardGrid>
+
+## How to read
+
+Reading through in order takes about two hours. To jump straight to task design, start at <a href={`${BASE}/en/chapters/${ch2.slug}/`}>Chapter 2</a>.
+
+You can select text in the article to highlight it. Highlights stay only in your browser, are never uploaded, and can be exported as a backup file.

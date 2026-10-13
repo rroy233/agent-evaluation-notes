@@ -1,0 +1,83 @@
+---
+// 语言切换器。Starlight 默认用原生 <select>，这里换成自定义下拉：
+// 按钮显示当前语言，点开是浮层菜单，选项是链接（可直接跳转，也能被预取）。
+import { Icon } from '@astrojs/starlight/components';
+import config from 'virtual:starlight/user-config';
+
+// 除 root 外的语种键会作为路径前缀出现在 URL 里。
+const prefixed = Object.keys(config.locales ?? {}).filter((code) => code !== 'root');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const currentLang = Astro.locals.starlightRoute.lang;
+
+/** 把当前路径换算成目标语种的等价路径。 */
+function hrefFor(code: string): string {
+  let rest = Astro.url.pathname;
+  if (base && rest.startsWith(base)) rest = rest.slice(base.length);
+  const segments = rest.split('/').filter(Boolean);
+  if (segments.length > 0 && prefixed.includes(segments[0]!)) segments.shift();
+  const prefix = code === 'root' ? '' : code;
+  // base 自带前导斜杠，先去掉再统一拼一次，避免出现 //。
+  const parts = [base.replace(/^\//, ''), prefix, ...segments].filter(Boolean);
+  return `/${parts.join('/')}/`;
+}
+
+const options =
+  config.isMultilingual && config.locales
+    ? Object.entries(config.locales).map(([code, locale]) => ({
+        lang: locale!.lang,
+        label: locale!.label,
+        href: hrefFor(code),
+        current: locale!.lang === currentLang,
+      }))
+    : [];
+
+const active = options.find((option) => option.current);
+---
+
+{
+  active && (
+    <div class="nav-dropdown" data-dropdown>
+      <button
+        type="button"
+        class="nav-dropdown__trigger"
+        data-dropdown-trigger
+        aria-expanded="false"
+        aria-haspopup="true"
+        aria-label={Astro.locals.t('languageSelect.accessibleLabel')}
+      >
+        <span class="nav-dropdown__glyph">
+          <Icon name="translate" />
+        </span>
+        <span class="nav-dropdown__value">{active.label}</span>
+        <span class="nav-dropdown__caret">
+          <Icon name="down-caret" />
+        </span>
+      </button>
+      <ul class="nav-dropdown__panel" data-dropdown-panel hidden>
+        {options.map((option) => (
+          <li>
+            <a
+              class="nav-dropdown__item"
+              href={option.href}
+              hreflang={option.lang}
+              lang={option.lang}
+              aria-current={option.current ? 'true' : undefined}
+            >
+              <span>{option.label}</span>
+              <span class="nav-dropdown__check">
+                <Icon name="approve-check" />
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+<script>
+  import { initDropdowns } from '../scripts/dropdown';
+
+  document.addEventListener('astro:page-load', initDropdowns);
+  initDropdowns();
+</script>
